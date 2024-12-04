@@ -111,10 +111,16 @@
 
         async function loadSharedContent() {
             const response = await fetch("/api/share-text", { method: "GET" });
-            const sharedTexts = await response.json();
+            
+            if (!response.ok) {
+                console.error("Failed to load shared content", response.statusText);
+                return;
+            }
 
+            const sharedTexts = await response.json();
+            
             const sharedContentContainer = document.querySelector("#sharedContent");
-            sharedContentContainer.innerHTML = "";
+            sharedContentContainer.innerHTML = ""; // Clear existing content
 
             sharedTexts.forEach((text) => {
                 const contentHtml = `
