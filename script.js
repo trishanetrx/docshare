@@ -1,42 +1,58 @@
 document.getElementById('pasteForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+    e.preventDefault();  // Prevents default form submission behavior
 
     const contentInput = document.getElementById('contentInput');
-    const content = contentInput.value;
+    const content = contentInput.value.trim();  // Get the content and trim extra spaces
 
-    // Send the pasted content to the backend for storing
-    const response = await fetch('/api/paste-content', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
-    });
+    // Check if content is not empty
+    if (!content) {
+        alert('Please paste some content');
+        return;
+    }
 
-    if (response.ok) {
-        contentInput.value = ''; // Clear the textarea
-        loadClipboardContent(); // Reload the displayed content
-    } else {
-        alert('Error saving content');
+    try {
+        // Send the pasted content to the backend for storing
+        const response = await fetch('/api/paste-content', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content }),
+        });
+
+        if (response.ok) {
+            contentInput.value = '';  // Clear the textarea
+            loadClipboardContent();   // Reload the displayed content
+        } else {
+            alert('Error saving content');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while saving the content');
     }
 });
 
 // Load the shared content
 async function loadClipboardContent() {
-    const response = await fetch('/api/get-content');
-    const contentItems = await response.json();
+    try {
+        const response = await fetch('/api/get-content');
+        const contentItems = await response.json();
 
-    const sharedContentContainer = document.getElementById('sharedContent');
-    sharedContentContainer.innerHTML = ''; // Clear existing content
+        const sharedContentContainer = document.getElementById('sharedContent');
+        sharedContentContainer.innerHTML = '';  // Clear existing content
 
-    contentItems.forEach((item) => {
-        const contentHtml = `
-            <li class="p-4 border border-gray-300 rounded">
-                <p class="text-gray-600">${item.content}</p>
-            </li>
-        `;
-        sharedContentContainer.innerHTML += contentHtml;
-    });
+        contentItems.forEach((item) => {
+            const contentHtml = `
+                <li class="p-4 border border-gray-300 rounded">
+                    <p class="text-gray-600">${item.content}</p>
+                </li>
+            `;
+            sharedContentContainer.innerHTML += contentHtml;
+        });
+    } catch (error) {
+        console.error('Error loading content:', error);
+        alert('An error occurred while loading content');
+    }
 }
 
 // Load the shared content when the page loads
