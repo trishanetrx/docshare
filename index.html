@@ -102,27 +102,49 @@
     </div>
 
     <script>
-        document.querySelector("form").addEventListener("submit", async (e) => {
-            e.preventDefault();
+    document.querySelector("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const fileInput = document.querySelector("input[type='file']");
-            const file = fileInput.files[0];
-            const fileContent = await file.text();
+        const title = document.querySelector("input[placeholder='Enter title']").value;
+        const content = document.querySelector("textarea[placeholder='Enter content']").value;
 
-            const response = await fetch("/api/upload-handler", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    fileName: file.name,
-                    fileContent: fileContent,
-                }),
-            });
-
-            const result = await response.json();
-            alert(result.message);
+        const response = await fetch("/api/share-text", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ title, content }),
         });
-    </script>
+
+        const result = await response.json();
+        alert(result.message);
+
+        // Reload shared content
+        loadSharedContent();
+    });
+
+    // Function to fetch and display shared text content
+    async function loadSharedContent() {
+        const response = await fetch("/api/share-text", { method: "GET" });
+        const sharedTexts = await response.json();
+
+        const sharedContentContainer = document.querySelector("#sharedContent");
+        sharedContentContainer.innerHTML = "";
+
+        sharedTexts.forEach((text) => {
+            const contentHtml = `
+                <li class="p-4 border border-gray-300 rounded">
+                    <h3 class="text-lg font-semibold">${text.title}</h3>
+                    <p class="text-gray-600">Shared on: ${new Date(text.timestamp).toLocaleString()}</p>
+                    <p class="mt-2">${text.content}</p>
+                </li>
+            `;
+            sharedContentContainer.innerHTML += contentHtml;
+        });
+    }
+
+    // Load shared content on page load
+    window.onload = loadSharedContent;
+</script>
 </body>
 </html>
