@@ -81,70 +81,55 @@
 
         <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
             <h2 class="text-2xl font-bold mb-4">Shared Text Content</h2>
-            <ul class="space-y-4">
-                <li class="p-4 border border-gray-300 rounded">
-                    <h3 class="text-lg font-semibold">Text Content 1</h3>
-                    <p class="text-gray-600">Shared on: 2023-10-01</p>
-                    <p class="mt-2">This is the content of the first shared text.</p>
-                </li>
-                <li class="p-4 border border-gray-300 rounded">
-                    <h3 class="text-lg font-semibold">Text Content 2</h3>
-                    <p class="text-gray-600">Shared on: 2023-10-02</p>
-                    <p class="mt-2">This is the content of the second shared text.</p>
-                </li>
-                <li class="p-4 border border-gray-300 rounded">
-                    <h3 class="text-lg font-semibold">Text Content 3</h3>
-                    <p class="text-gray-600">Shared on: 2023-10-03</p>
-                    <p class="mt-2">This is the content of the third shared text.</p>
-                </li>
+            <ul id="sharedContent" class="space-y-4">
+                <!-- Shared content will be dynamically added here -->
             </ul>
         </div>
     </div>
 
     <script>
-    document.querySelector("form").addEventListener("submit", async (e) => {
-        e.preventDefault();
+        document.querySelector("form").addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        const title = document.querySelector("input[placeholder='Enter title']").value;
-        const content = document.querySelector("textarea[placeholder='Enter content']").value;
+            const title = document.querySelector("input[placeholder='Enter title']").value;
+            const content = document.querySelector("textarea[placeholder='Enter content']").value;
 
-        const response = await fetch("/api/share-text", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ title, content }),
+            const response = await fetch("/api/share-text", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ title, content }),
+            });
+
+            const result = await response.json();
+            alert(result.message);
+
+            // Reload shared content
+            loadSharedContent();
         });
 
-        const result = await response.json();
-        alert(result.message);
+        async function loadSharedContent() {
+            const response = await fetch("/api/share-text", { method: "GET" });
+            const sharedTexts = await response.json();
 
-        // Reload shared content
-        loadSharedContent();
-    });
+            const sharedContentContainer = document.querySelector("#sharedContent");
+            sharedContentContainer.innerHTML = "";
 
-    // Function to fetch and display shared text content
-    async function loadSharedContent() {
-        const response = await fetch("/api/share-text", { method: "GET" });
-        const sharedTexts = await response.json();
+            sharedTexts.forEach((text) => {
+                const contentHtml = `
+                    <li class="p-4 border border-gray-300 rounded">
+                        <h3 class="text-lg font-semibold">${text.title}</h3>
+                        <p class="text-gray-600">Shared on: ${new Date(text.timestamp).toLocaleString()}</p>
+                        <p class="mt-2">${text.content}</p>
+                    </li>
+                `;
+                sharedContentContainer.innerHTML += contentHtml;
+            });
+        }
 
-        const sharedContentContainer = document.querySelector("#sharedContent");
-        sharedContentContainer.innerHTML = "";
-
-        sharedTexts.forEach((text) => {
-            const contentHtml = `
-                <li class="p-4 border border-gray-300 rounded">
-                    <h3 class="text-lg font-semibold">${text.title}</h3>
-                    <p class="text-gray-600">Shared on: ${new Date(text.timestamp).toLocaleString()}</p>
-                    <p class="mt-2">${text.content}</p>
-                </li>
-            `;
-            sharedContentContainer.innerHTML += contentHtml;
-        });
-    }
-
-    // Load shared content on page load
-    window.onload = loadSharedContent;
-</script>
+        // Load shared content on page load
+        window.onload = loadSharedContent;
+    </script>
 </body>
 </html>
