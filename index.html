@@ -1,0 +1,103 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Sharing App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-roboto">
+    <nav class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold">DocShare</a>
+            <ul class="flex space-x-4">
+                <li><a href="#" class="hover:underline">Home</a></li>
+                <li><a href="#" class="hover:underline">Documents</a></li>
+                <li><a href="#" class="hover:underline">Text Content</a></li>
+                <li><a href="#" class="hover:underline">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4">Upload Document</h2>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-gray-700">Document Title</label>
+                    <input type="text" class="w-full p-2 border border-gray-300 rounded mt-1" placeholder="Enter document title">
+                </div>
+                <div>
+                    <label class="block text-gray-700">Upload File</label>
+                    <input type="file" class="w-full p-2 border border-gray-300 rounded mt-1">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h2 class="text-2xl font-bold mb-4">Shared Documents</h2>
+            <ul class="space-y-4">
+                <li class="flex items-center justify-between p-4 border border-gray-300 rounded">
+                    <div>
+                        <h3 class="text-lg font-semibold">Document 1</h3>
+                        <p class="text-gray-600">Uploaded on: 2023-10-01</p>
+                    </div>
+                    <a href="#" class="text-blue-600 hover:underline">Download</a>
+                </li>
+                <li class="flex items-center justify-between p-4 border border-gray-300 rounded">
+                    <div>
+                        <h3 class="text-lg font-semibold">Document 2</h3>
+                        <p class="text-gray-600">Uploaded on: 2023-10-02</p>
+                    </div>
+                    <a href="#" class="text-blue-600 hover:underline">Download</a>
+                </li>
+                <li class="flex items-center justify-between p-4 border border-gray-300 rounded">
+                    <div>
+                        <h3 class="text-lg font-semibold">Document 3</h3>
+                        <p class="text-gray-600">Uploaded on: 2023-10-03</p>
+                    </div>
+                    <a href="#" class="text-blue-600 hover:underline">Download</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h2 class="text-2xl font-bold mb-4">Share Text Content</h2>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-gray-700">Title</label>
+                    <input type="text" class="w-full p-2 border border-gray-300 rounded mt-1" placeholder="Enter title">
+                </div>
+                <div>
+                    <label class="block text-gray-700">Content</label>
+                    <textarea class="w-full p-2 border border-gray-300 rounded mt-1" rows="4" placeholder="Enter content"></textarea>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Share</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h2 class="text-2xl font-bold mb-4">Shared Text Content</h2>
+            <ul class="space-y-4">
+                <li class="p-4 border border-gray-300 rounded">
+                    <h3 class="text-lg font-semibold">Text Content 1</h3>
+                    <p class="text-gray-600">Shared on: 2023-10-01</p>
+                    <p class="mt-2">This is the content of the first shared text.</p>
+                </li>
+                <li class="p-4 border border-gray-300 rounded">
+                    <h3 class="text-lg font-semibold">Text Content 2</h3>
+                    <p class="text-gray-600">Shared on: 2023-10-02</p>
+                    <p class="mt-2">This is the content of the second shared text.</p>
+                </li>
+                <li class="p-4 border border-gray-300 rounded">
+                    <h3 class="text-lg font-semibold">Text Content 3</h3>
+                    <p class="text-gray-600">Shared on: 2023-10-03</p>
+                    <p class="mt-2">This is the content of the third shared text.</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
