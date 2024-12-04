@@ -3,139 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Sharing App</title>
+    <title>Clipboard Content Display</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gray-100 font-roboto">
+
     <nav class="bg-blue-600 p-4 text-white">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold">DocShare</a>
-            <ul class="flex space-x-4">
-                <li><a href="#" class="hover:underline">Home</a></li>
-                <li><a href="#" class="hover:underline">Documents</a></li>
-                <li><a href="#" class="hover:underline">Text Content</a></li>
-                <li><a href="#" class="hover:underline">Contact</a></li>
-            </ul>
+            <a href="#" class="text-2xl font-bold">Clipboard Display</a>
         </div>
     </nav>
 
     <div class="container mx-auto mt-8">
         <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-bold mb-4">Upload Document</h2>
-            <form class="space-y-4">
-                <div>
-                    <label class="block text-gray-700">Document Title</label>
-                    <input type="text" class="w-full p-2 border border-gray-300 rounded mt-1" placeholder="Enter document title">
-                </div>
-                <div>
-                    <label class="block text-gray-700">Upload File</label>
-                    <input type="file" class="w-full p-2 border border-gray-300 rounded mt-1">
-                </div>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
-            </form>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
-            <h2 class="text-2xl font-bold mb-4">Shared Documents</h2>
-            <ul class="space-y-4">
-                <li class="flex items-center justify-between p-4 border border-gray-300 rounded">
-                    <div>
-                        <h3 class="text-lg font-semibold">Document 1</h3>
-                        <p class="text-gray-600">Uploaded on: 2023-10-01</p>
-                    </div>
-                    <a href="#" class="text-blue-600 hover:underline">Download</a>
-                </li>
-                <li class="flex items-center justify-between p-4 border border-gray-300 rounded">
-                    <div>
-                        <h3 class="text-lg font-semibold">Document 2</h3>
-                        <p class="text-gray-600">Uploaded on: 2023-10-02</p>
-                    </div>
-                    <a href="#" class="text-blue-600 hover:underline">Download</a>
-                </li>
-                <li class="flex items-center justify-between p-4 border border-gray-300 rounded">
-                    <div>
-                        <h3 class="text-lg font-semibold">Document 3</h3>
-                        <p class="text-gray-600">Uploaded on: 2023-10-03</p>
-                    </div>
-                    <a href="#" class="text-blue-600 hover:underline">Download</a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
-            <h2 class="text-2xl font-bold mb-4">Share Text Content</h2>
-            <form class="space-y-4">
-                <div>
-                    <label class="block text-gray-700">Title</label>
-                    <input type="text" class="w-full p-2 border border-gray-300 rounded mt-1" placeholder="Enter title">
-                </div>
-                <div>
-                    <label class="block text-gray-700">Content</label>
-                    <textarea class="w-full p-2 border border-gray-300 rounded mt-1" rows="4" placeholder="Enter content"></textarea>
-                </div>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Share</button>
-            </form>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
-            <h2 class="text-2xl font-bold mb-4">Shared Text Content</h2>
+            <h2 class="text-2xl font-bold mb-4">Shared Clipboard Content</h2>
             <ul id="sharedContent" class="space-y-4">
-                <!-- Shared content will be dynamically added here -->
+                <!-- Clipboard content will be dynamically added here -->
             </ul>
         </div>
     </div>
 
-    <script>
-        document.querySelector("form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const title = document.querySelector("input[placeholder='Enter title']").value;
-            const content = document.querySelector("textarea[placeholder='Enter content']").value;
-
-            const response = await fetch("/api/share-text", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ title, content }),
-            });
-
-            const result = await response.json();
-            alert(result.message);
-
-            // Reload shared content
-            loadSharedContent();
-        });
-
-        async function loadSharedContent() {
-            const response = await fetch("/api/share-text", { method: "GET" });
-            
-            if (!response.ok) {
-                console.error("Failed to load shared content", response.statusText);
-                return;
-            }
-
-            const sharedTexts = await response.json();
-            
-            const sharedContentContainer = document.querySelector("#sharedContent");
-            sharedContentContainer.innerHTML = ""; // Clear existing content
-
-            sharedTexts.forEach((text) => {
-                const contentHtml = `
-                    <li class="p-4 border border-gray-300 rounded">
-                        <h3 class="text-lg font-semibold">${text.title}</h3>
-                        <p class="text-gray-600">Shared on: ${new Date(text.timestamp).toLocaleString()}</p>
-                        <p class="mt-2">${text.content}</p>
-                    </li>
-                `;
-                sharedContentContainer.innerHTML += contentHtml;
-            });
-        }
-
-        // Load shared content on page load
-        window.onload = loadSharedContent;
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
