@@ -1,0 +1,14 @@
+[
+    {
+        "title": "List Files",
+        "content": "ls -l"
+    },
+    {
+        "title": "Change Directory",
+        "content": "cd /path/to/directory"
+    },
+    {
+        "title": "Show Disk Usage",
+        "content": "df -h"
+    }
+]
