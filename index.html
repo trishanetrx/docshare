@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -99,5 +100,29 @@
             </ul>
         </div>
     </div>
+
+    <script>
+        document.querySelector("form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.querySelector("input[type='file']");
+            const file = fileInput.files[0];
+            const fileContent = await file.text();
+
+            const response = await fetch("/api/upload-handler", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    fileName: file.name,
+                    fileContent: fileContent,
+                }),
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        });
+    </script>
 </body>
 </html>
