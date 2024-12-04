@@ -1,59 +1,51 @@
-document.getElementById('pasteForm').addEventListener('submit', async (e) => {
-    e.preventDefault();  // Prevents default form submission behavior
+const apiUrl = 'http://:4.248.153.134:3000/clipboard'; // Replace with your server's IP or domain
 
-    const contentInput = document.getElementById('contentInput');
-    const content = contentInput.value.trim();  // Get the content and trim extra spaces
+document.getElementById('saveButton').addEventListener('click', saveToClipboard);
+document.getElementById('loadButton').addEventListener('click', loadClipboard);
 
-    // Check if content is not empty
-    if (!content) {
-        alert('Please paste some content');
+async function saveToClipboard() {
+    const text = document.getElementById('clipboardInput').value;
+    if (!text) {
+        alert('Please enter some text to save.');
         return;
     }
 
     try {
-        // Send the pasted content to the backend for storing
-        const response = await fetch('/api/paste-content', {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ content }),
+            body: JSON.stringify({ text }),
         });
 
         if (response.ok) {
-            contentInput.value = '';  // Clear the textarea
-            loadClipboardContent();   // Reload the displayed content
+            alert('Text saved to clipboard!');
+            document.getElementById('clipboardInput').value = ''; // Clear input
         } else {
-            alert('Error saving content');
+            alert('Failed to save text.');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while saving the content');
-    }
-});
-
-// Load the shared content
-async function loadClipboardContent() {
-    try {
-        const response = await fetch('/api/get-content');
-        const contentItems = await response.json();
-
-        const sharedContentContainer = document.getElementById('sharedContent');
-        sharedContentContainer.innerHTML = '';  // Clear existing content
-
-        contentItems.forEach((item) => {
-            const contentHtml = `
-                <li class="p-4 border border-gray-300 rounded">
-                    <p class="text-gray-600">${item.content}</p>
-                </li>
-            `;
-            sharedContentContainer.innerHTML += contentHtml;
-        });
-    } catch (error) {
-        console.error('Error loading content:', error);
-        alert('An error occurred while loading content');
+        alert('An error occurred while saving text.');
     }
 }
 
-// Load the shared content when the page loads
-window.onload = loadClipboardContent;
+async function loadClipboard() {
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        const clipboardList = document.getElementById('clipboardList');
+        clipboardList.innerHTML = ''; // Clear previous list
+
+        data.forEach((item) => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            clipboardList.appendChild(li);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while loading clipboard data.');
+    }
+}
