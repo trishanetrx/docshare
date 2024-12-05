@@ -2,12 +2,14 @@ const apiUrl = 'https://negombotech.com/clipboard'; // Replace with your server'
 
 document.getElementById('saveButton').addEventListener('click', saveToClipboard);
 document.getElementById('loadButton').addEventListener('click', loadClipboard);
-document.getElementById('clearButton').addEventListener('click', clearClipboard); // Add event listener for clear button
+document.getElementById('clearButton').addEventListener('click', clearClipboard);
 
 async function saveToClipboard() {
     const text = document.getElementById('clipboardInput').value;
+    const statusMessage = document.getElementById('statusMessage'); // For feedback
+
     if (!text) {
-        alert('Please enter some text to save.');
+        showMessage('Please enter some text to save.', 'error');
         return;
     }
 
@@ -21,15 +23,15 @@ async function saveToClipboard() {
         });
 
         if (response.ok) {
-            alert('Text saved to clipboard!');
+            showMessage('Text saved to clipboard!', 'success');
             document.getElementById('clipboardInput').value = ''; // Clear input
-            loadClipboard(); // Automatically load and display clipboard data after saving
+            loadClipboard(); // Automatically refresh clipboard data
         } else {
-            alert('Failed to save text.');
+            showMessage('Failed to save text.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while saving text.');
+        showMessage('An error occurred while saving text.', 'error');
     }
 }
 
@@ -52,7 +54,7 @@ async function loadClipboard() {
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while loading clipboard data.');
+        showMessage('An error occurred while loading clipboard data.', 'error');
     }
 }
 
@@ -63,13 +65,25 @@ async function clearClipboard() {
         });
 
         if (response.ok) {
-            alert('Clipboard cleared!');
+            showMessage('Clipboard cleared!', 'success');
             loadClipboard(); // Refresh the list after clearing
         } else {
-            alert('Failed to clear clipboard.');
+            showMessage('Failed to clear clipboard.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while clearing clipboard.');
+        showMessage('An error occurred while clearing clipboard.', 'error');
     }
+}
+
+// Utility function for showing status messages
+function showMessage(message, type) {
+    const statusMessage = document.getElementById('statusMessage');
+    statusMessage.textContent = message;
+    statusMessage.style.display = 'block';
+    statusMessage.style.color = type === 'success' ? 'green' : 'red';
+
+    setTimeout(() => {
+        statusMessage.style.display = 'none'; // Hide after 3 seconds
+    }, 3000);
 }
