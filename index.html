@@ -33,14 +33,20 @@
             </button>
         </div>
 
+        <!-- File Upload Section -->
+        <h2 class="text-xl font-semibold mb-2">File Sharing:</h2>
+        <input id="fileInput" type="file" class="mb-4 p-2 border border-gray-300 rounded" aria-label="Choose a file to upload">
+        <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Upload a file">
+            <i class="fas fa-upload"></i> Upload File
+        </button>
+
+        <!-- File List -->
+        <ul id="fileList" class="list-disc pl-5 mt-4">
+            <!-- Dynamic File List Will Be Injected Here -->
+        </ul>
+
         <!-- Feedback Status Message -->
         <div id="statusMessage" class="text-center text-lg font-semibold mb-4" style="display: none;"></div>
-
-        <!-- Clipboard List -->
-        <h2 class="text-xl font-semibold mb-2">Saved Clipboard Data:</h2>
-        <ul id="clipboardList" class="list-disc pl-5">
-            <!-- Dynamic Clipboard Data Will Be Injected Here -->
-        </ul>
     </main>
 
     <!-- External JavaScript -->
