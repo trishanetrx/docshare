@@ -1,4 +1,4 @@
-const apiUrl = 'http://:4.248.153.134:3000/clipboard'; // Replace with your server's IP or domain
+const apiUrl = 'http://:negombotech.com:3000/clipboard'; // Replace with your server's IP or domain
 
 document.getElementById('saveButton').addEventListener('click', saveToClipboard);
 document.getElementById('loadButton').addEventListener('click', loadClipboard);
