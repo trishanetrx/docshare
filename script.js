@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const apiUrl = 'https://negombotech.com/clipboard'; // Clipboard API
-    const filesUrl = 'https://negombotech.com/files';   // Files API base
+    const filesUrl = 'https://negombotech.com/uploads';   // Correct URL for accessing uploaded files
+
     const uploadUrl = 'https://negombotech.com/upload';  // Correct URL for the upload route
 
     // Event Listeners
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load clipboard data
     async function loadClipboard() {
         const clipboardList = document.getElementById('clipboardList');
-        if (!clipboardList) return;  // Ensure the element exists
+        if (!clipboardList) return;
 
         try {
             const response = await fetch(apiUrl);
@@ -102,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('file', file);
 
         try {
-            const response = await fetch(uploadUrl, {  // Use the correct URL here
+            const response = await fetch(uploadUrl, {  // Correct URL here for file upload
                 method: 'POST',
                 body: formData,
             });
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fileList.innerHTML = ''; // Clear previous list
 
         try {
-            const response = await fetch(filesUrl);
+            const response = await fetch(filesUrl);  // Correct URL here for files list
             const files = await response.json();
 
             if (files.length === 0) {
@@ -139,51 +140,4 @@ document.addEventListener('DOMContentLoaded', function () {
                     const downloadLink = document.createElement('a');
                     downloadLink.href = `${filesUrl}/${file}`;
                     downloadLink.textContent = file;
-                    downloadLink.className = "text-blue-500 underline";
-                    downloadLink.target = "_blank";
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = "Delete";
-                    deleteButton.className = "ml-2 text-red-500";
-                    deleteButton.addEventListener('click', () => deleteFile(file));
-
-                    li.appendChild(downloadLink);
-                    li.appendChild(deleteButton);
-                    fileList.appendChild(li);
-                });
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage('An error occurred while loading files.', 'error');
-        }
-    }
-
-    // Delete a file
-    async function deleteFile(filename) {
-        try {
-            const response = await fetch(`${filesUrl}/${filename}`, { method: 'DELETE' });
-
-            if (response.ok) {
-                showMessage('File deleted successfully.', 'success');
-                loadFileList(); // Refresh file list
-            } else {
-                showMessage('Failed to delete file.', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage('An error occurred while deleting file.', 'error');
-        }
-    }
-
-    // Utility function for showing status messages
-    function showMessage(message, type) {
-        const statusMessage = document.getElementById('statusMessage');
-        statusMessage.textContent = message;
-        statusMessage.style.display = 'block';
-        statusMessage.style.color = type === 'success' ? 'green' : 'red';
-
-        setTimeout(() => {
-            statusMessage.style.display = 'none'; // Hide after 3 seconds
-        }, 3000);
-    }
-});
+                    downloadLink.className = "text-blue-
