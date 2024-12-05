@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +8,7 @@
     <title>Online Clipboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body class="bg-gray-100 font-roboto">
     <!-- Header Section -->
@@ -22,31 +23,36 @@
 
         <!-- Buttons -->
         <div class="flex justify-center space-x-4 mb-4">
-            <button id="saveButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Save text to clipboard">
+            <button id="saveButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
                 <i class="fas fa-save"></i> Save to Clipboard
             </button>
-            <button id="loadButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Load text from clipboard">
+            <button id="loadButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
                 <i class="fas fa-upload"></i> Load Clipboard
             </button>
-            <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700" aria-label="Clear all clipboard data">
+            <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
                 <i class="fas fa-trash-alt"></i> Clear Clipboard
             </button>
         </div>
 
-        <!-- File Upload Section -->
-        <h2 class="text-xl font-semibold mb-2">File Sharing:</h2>
-        <input id="fileInput" type="file" class="mb-4 p-2 border border-gray-300 rounded" aria-label="Choose a file to upload">
-        <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Upload a file">
-            <i class="fas fa-upload"></i> Upload File
-        </button>
-
-        <!-- File List -->
-        <ul id="fileList" class="list-disc pl-5 mt-4">
-            <!-- Dynamic File List Will Be Injected Here -->
-        </ul>
-
         <!-- Feedback Status Message -->
         <div id="statusMessage" class="text-center text-lg font-semibold mb-4" style="display: none;"></div>
+
+        <!-- Clipboard List -->
+        <h2 class="text-xl font-semibold mb-2">Saved Clipboard Data:</h2>
+        <ul id="clipboardList" class="list-disc pl-5">
+            <!-- Dynamic Clipboard Data Will Be Injected Here -->
+        </ul>
+
+        <!-- File Upload Section -->
+        <h2 class="text-xl font-semibold mb-2">File Upload:</h2>
+        <input type="file" id="fileInput" class="mb-4 p-2 border border-gray-300 rounded w-full" />
+        <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Upload File</button>
+
+        <!-- File List -->
+        <h2 class="text-xl font-semibold mb-2">Uploaded Files:</h2>
+        <ul id="fileList" class="list-disc pl-5">
+            <!-- Dynamic File List Will Be Injected Here -->
+        </ul>
     </main>
 
     <!-- External JavaScript -->
