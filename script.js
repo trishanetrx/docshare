@@ -1,89 +1,94 @@
-const apiUrl = 'https://negombotech.com/clipboard'; // Replace with your server's IP or domain
+const apiUrl = 'https://negombotech.com/clipboard'; // Clipboard API
+const filesUrl = 'https://negombotech.com/files';   // Files API base
 
-document.getElementById('saveButton').addEventListener('click', saveToClipboard);
-document.getElementById('loadButton').addEventListener('click', loadClipboard);
-document.getElementById('clearButton').addEventListener('click', clearClipboard);
+// Event Listeners
+document.getElementById('uploadButton').addEventListener('click', uploadFile);
+loadFileList(); // Load file list on page load
 
-async function saveToClipboard() {
-    const text = document.getElementById('clipboardInput').value;
-    const statusMessage = document.getElementById('statusMessage'); // For feedback
+// Upload a file
+async function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    const statusMessage = document.getElementById('statusMessage');
 
-    if (!text) {
-        showMessage('Please enter some text to save.', 'error');
+    if (!file) {
+        showMessage('Please choose a file to upload.', 'error');
         return;
     }
 
+    const formData = new FormData();
+    formData.append('file', file);
+
     try {
-        const response = await fetch(apiUrl, {
+        const response = await fetch(`${filesUrl}/upload`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text }),
+            body: formData,
         });
 
         if (response.ok) {
-            showMessage('Text saved to clipboard!', 'success');
-            document.getElementById('clipboardInput').value = ''; // Clear input
-            loadClipboard(); // Automatically refresh clipboard data
+            showMessage('File uploaded successfully!', 'success');
+            fileInput.value = ''; // Clear file input
+            loadFileList(); // Refresh file list
         } else {
-            showMessage('Failed to save text.', 'error');
+            showMessage('Failed to upload file.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('An error occurred while saving text.', 'error');
+        showMessage('An error occurred while uploading file.', 'error');
     }
 }
 
-async function loadClipboard() {
+// Load the list of uploaded files
+async function loadFileList() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Clear previous list
+
     try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const response = await fetch(filesUrl);
+        const files = await response.json();
 
-        const clipboardList = document.getElementById('clipboardList');
-        clipboardList.innerHTML = ''; // Clear previous list
-
-        if (data.length === 0) {
-            clipboardList.innerHTML = '<li class="text-gray-500">No clipboard data available.</li>';
+        if (files.length === 0) {
+            fileList.innerHTML = '<li class="text-gray-500">No files available.</li>';
         } else {
-            data.forEach((item) => {
+            files.forEach((file) => {
                 const li = document.createElement('li');
-                li.textContent = item;
-                clipboardList.appendChild(li);
+                li.className = "mb-2";
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `${filesUrl}/${file}`;
+                downloadLink.textContent = file;
+                downloadLink.className = "text-blue-500 underline";
+                downloadLink.target = "_blank";
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "ml-2 text-red-500";
+                deleteButton.addEventListener('click', () => deleteFile(file));
+
+                li.appendChild(downloadLink);
+                li.appendChild(deleteButton);
+                fileList.appendChild(li);
             });
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('An error occurred while loading clipboard data.', 'error');
+        showMessage('An error occurred while loading files.', 'error');
     }
 }
 
-async function clearClipboard() {
+// Delete a file
+async function deleteFile(filename) {
     try {
-        const response = await fetch(apiUrl, {
-            method: 'DELETE', // Assuming you have implemented a DELETE route in the backend
-        });
+        const response = await fetch(`${filesUrl}/${filename}`, { method: 'DELETE' });
 
         if (response.ok) {
-            showMessage('Clipboard cleared!', 'success');
-            loadClipboard(); // Refresh the list after clearing
+            showMessage('File deleted successfully.', 'success');
+            loadFileList(); // Refresh file list
         } else {
-            showMessage('Failed to clear clipboard.', 'error');
+            showMessage('Failed to delete file.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('An error occurred while clearing clipboard.', 'error');
+        showMessage('An error occurred while deleting file.', 'error');
     }
-}
-
-// Utility function for showing status messages
-function showMessage(message, type) {
-    const statusMessage = document.getElementById('statusMessage');
-    statusMessage.textContent = message;
-    statusMessage.style.display = 'block';
-    statusMessage.style.color = type === 'success' ? 'green' : 'red';
-
-    setTimeout(() => {
-        statusMessage.style.display = 'none'; // Hide after 3 seconds
-    }, 3000);
 }
