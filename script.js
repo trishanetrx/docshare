@@ -2,6 +2,7 @@ const apiUrl = 'https://negombotech.com/clipboard'; // Replace with your server'
 
 document.getElementById('saveButton').addEventListener('click', saveToClipboard);
 document.getElementById('loadButton').addEventListener('click', loadClipboard);
+document.getElementById('clearButton').addEventListener('click', clearClipboard); // Add event listener for clear button
 
 async function saveToClipboard() {
     const text = document.getElementById('clipboardInput').value;
@@ -40,13 +41,35 @@ async function loadClipboard() {
         const clipboardList = document.getElementById('clipboardList');
         clipboardList.innerHTML = ''; // Clear previous list
 
-        data.forEach((item) => {
-            const li = document.createElement('li');
-            li.textContent = item;
-            clipboardList.appendChild(li);
-        });
+        if (data.length === 0) {
+            clipboardList.innerHTML = '<li class="text-gray-500">No clipboard data available.</li>';
+        } else {
+            data.forEach((item) => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                clipboardList.appendChild(li);
+            });
+        }
     } catch (error) {
         console.error('Error:', error);
         alert('An error occurred while loading clipboard data.');
+    }
+}
+
+async function clearClipboard() {
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'DELETE', // Assuming you have implemented a DELETE route in the backend
+        });
+
+        if (response.ok) {
+            alert('Clipboard cleared!');
+            loadClipboard(); // Refresh the list after clearing
+        } else {
+            alert('Failed to clear clipboard.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while clearing clipboard.');
     }
 }
