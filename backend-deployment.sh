@@ -27,18 +27,26 @@ app.use(bodyParser.json());
 
 let clipboardData = [];
 
+// POST route to save clipboard data
 app.post('/clipboard', (req, res) => {
     const { text } = req.body;
     clipboardData.push(text);
     res.status(201).send({ message: 'Text added to clipboard', data: clipboardData });
 });
 
+// GET route to load clipboard data
 app.get('/clipboard', (req, res) => {
     res.status(200).send(clipboardData);
 });
 
+// DELETE route to clear clipboard data
+app.delete('/clipboard', (req, res) => {
+    clipboardData = [];  // Clear the clipboard data
+    res.status(200).send({ message: 'Clipboard cleared.' });
+});
+
 app.listen(PORT, () => {
-    console.log(\`Server is running on http://localhost:${PORT}\`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
 EOL
 
