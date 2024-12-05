@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An online clipboard application to save and load text easily.">
+    <meta name="keywords" content="clipboard, online, text, save, load">
     <title>Online Clipboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>Online Clipboard</h1>
+    </header>
+    <main class="container">
         <textarea id="clipboardInput" placeholder="Type or paste your text here..."></textarea>
         <div class="buttons">
-            <button id="saveButton">Save to Clipboard</button>
-            <button id="loadButton">Load Clipboard</button>
+            <button id="saveButton" aria-label="Save text to clipboard">Save to Clipboard</button>
+            <button id="loadButton" aria-label="Load text from clipboard">Load Clipboard</button>
         </div>
         <h2>Saved Clipboard Data:</h2>
         <ul id="clipboardList"></ul>
-    </div>
+    </main>
     <script src="script.js"></script>
 </body>
 </html>
