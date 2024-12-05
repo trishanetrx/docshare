@@ -10,11 +10,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
 </head>
 <body class="bg-gray-100 font-roboto">
+    <!-- Header Section -->
     <header class="bg-blue-600 text-white p-4">
         <h1 class="text-2xl font-bold text-center">VentiqoTech - Online Clipboard</h1>
     </header>
+
+    <!-- Main Content -->
     <main class="container mx-auto p-4">
+        <!-- Input Area -->
         <textarea id="clipboardInput" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Type or paste your text here..."></textarea>
+
+        <!-- Buttons -->
         <div class="flex justify-center space-x-4 mb-4">
             <button id="saveButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Save text to clipboard">
                 <i class="fas fa-save"></i> Save to Clipboard
@@ -22,16 +28,22 @@
             <button id="loadButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Load text from clipboard">
                 <i class="fas fa-upload"></i> Load Clipboard
             </button>
-            <!-- Clear Clipboard Button -->
             <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700" aria-label="Clear all clipboard data">
                 <i class="fas fa-trash-alt"></i> Clear Clipboard
             </button>
         </div>
+
+        <!-- Feedback Status Message -->
+        <div id="statusMessage" class="text-center text-lg font-semibold mb-4" style="display: none;"></div>
+
+        <!-- Clipboard List -->
         <h2 class="text-xl font-semibold mb-2">Saved Clipboard Data:</h2>
         <ul id="clipboardList" class="list-disc pl-5">
-            <li class="mb-2">Sample saved text 1</li>
+            <!-- Dynamic Clipboard Data Will Be Injected Here -->
         </ul>
     </main>
+
+    <!-- External JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
