@@ -1,4 +1,4 @@
-const apiUrl = 'https://negombotech.com/clipboard'; // Replace with your server's IP or domain
+const apiUrl = 'https://negombotech.com'; // Base API URL, updated to correct endpoint
 
 // Clipboard functionality
 document.getElementById('saveButton').addEventListener('click', saveToClipboard);
@@ -15,7 +15,7 @@ async function saveToClipboard() {
     }
 
     try {
-        const response = await fetch(apiUrl, {
+        const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text }),
@@ -35,7 +35,7 @@ async function saveToClipboard() {
 
 async function loadClipboard() {
     try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(`${apiUrl}/clipboard`);
         const data = await response.json();
 
         const clipboardList = document.getElementById('clipboardList');
@@ -57,7 +57,7 @@ async function loadClipboard() {
 
 async function clearClipboard() {
     try {
-        const response = await fetch(apiUrl, { method: 'DELETE' });
+        const response = await fetch(`${apiUrl}/clipboard`, { method: 'DELETE' });
 
         if (response.ok) {
             showMessage('Clipboard cleared!', 'success');
@@ -83,7 +83,7 @@ async function uploadFile() {
         return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) { // 10 MB file size limit
         showMessage('File size exceeds 10 MB.', 'error');
         return;
     }
@@ -92,7 +92,7 @@ async function uploadFile() {
     formData.append('file', file);
 
     try {
-        const response = await fetch(`${apiUrl}/uploads`, {
+        const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
             body: formData,
         });
