@@ -22,6 +22,7 @@ async function saveToClipboard() {
         if (response.ok) {
             alert('Text saved to clipboard!');
             document.getElementById('clipboardInput').value = ''; // Clear input
+            loadClipboard(); // Automatically load and display clipboard data after saving
         } else {
             alert('Failed to save text.');
         }
