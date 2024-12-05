@@ -6,41 +6,32 @@ document.getElementById('clearButton').addEventListener('click', clearClipboard)
 
 async function saveToClipboard() {
     const text = document.getElementById('clipboardInput').value;
-    const fileInput = document.getElementById('fileInput');
     const statusMessage = document.getElementById('statusMessage'); // For feedback
 
-    const formData = new FormData(); // Using FormData to send both text and file
-
-    if (text) {
-        formData.append('text', text); // Append text to the FormData
-    }
-
-    if (fileInput.files.length > 0) {
-        formData.append('file', fileInput.files[0]); // Append the selected file to the FormData
-    }
-
-    if (!text && fileInput.files.length === 0) {
-        showMessage('Please enter text or select a file to save.', 'error');
+    if (!text) {
+        showMessage('Please enter some text to save.', 'error');
         return;
     }
 
     try {
         const response = await fetch(apiUrl, {
             method: 'POST',
-            body: formData, // Send the FormData as the body
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text }),
         });
 
         if (response.ok) {
-            showMessage('Text and/or file saved to clipboard!', 'success');
+            showMessage('Text saved to clipboard!', 'success');
             document.getElementById('clipboardInput').value = ''; // Clear input
-            fileInput.value = ''; // Clear file input
             loadClipboard(); // Automatically refresh clipboard data
         } else {
-            showMessage('Failed to save text or file.', 'error');
+            showMessage('Failed to save text.', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showMessage('An error occurred while saving text or file.', 'error');
+        showMessage('An error occurred while saving text.', 'error');
     }
 }
 
@@ -57,11 +48,7 @@ async function loadClipboard() {
         } else {
             data.forEach((item) => {
                 const li = document.createElement('li');
-                if (item.text) {
-                    li.textContent = item.text;
-                } else if (item.file) {
-                    li.innerHTML = `<a href="/uploads/${item.file}" target="_blank">Download File</a>`; // Link to the uploaded file
-                }
+                li.textContent = item;
                 clipboardList.appendChild(li);
             });
         }
