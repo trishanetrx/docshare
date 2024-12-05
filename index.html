@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,20 +5,29 @@
     <meta name="description" content="An online clipboard application to save and load text easily.">
     <meta name="keywords" content="clipboard, online, text, save, load">
     <title>Online Clipboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
 </head>
-<body>
-    <header>
-        <h1>Online Clipboard</h1>
+<body class="bg-gray-100 font-roboto">
+    <header class="bg-blue-600 text-white p-4">
+        <h1 class="text-2xl font-bold text-center">Online Clipboard</h1>
     </header>
-    <main class="container">
-        <textarea id="clipboardInput" placeholder="Type or paste your text here..."></textarea>
-        <div class="buttons">
-            <button id="saveButton" aria-label="Save text to clipboard">Save to Clipboard</button>
-            <button id="loadButton" aria-label="Load text from clipboard">Load Clipboard</button>
+    <main class="container mx-auto p-4">
+        <textarea id="clipboardInput" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Type or paste your text here..."></textarea>
+        <div class="flex justify-center space-x-4 mb-4">
+            <button id="saveButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Save text to clipboard">
+                <i class="fas fa-save"></i> Save to Clipboard
+            </button>
+            <button id="loadButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Load text from clipboard">
+                <i class="fas fa-upload"></i> Load Clipboard
+            </button>
         </div>
-        <h2>Saved Clipboard Data:</h2>
-        <ul id="clipboardList"></ul>
+        <h2 class="text-xl font-semibold mb-2">Saved Clipboard Data:</h2>
+        <ul id="clipboardList" class="list-disc pl-5">
+            <li class="mb-2">Sample saved text 1</li>
+            
+        </ul>
     </main>
     <script src="script.js"></script>
 </body>
