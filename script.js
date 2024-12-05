@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const apiUrl = 'https://negombotech.com/clipboard'; // Clipboard API
     const filesUrl = 'https://negombotech.com/files';   // Files API base
+    const uploadUrl = 'https://negombotech.com/upload';  // Correct URL for the upload route
 
     // Event Listeners
     document.getElementById('saveButton').addEventListener('click', saveToClipboard);
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('file', file);
 
         try {
-            const response = await fetch(`${filesUrl}/upload`, {
+            const response = await fetch(uploadUrl, {  // Use the correct URL here
                 method: 'POST',
                 body: formData,
             });
