@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const apiUrl = 'https://negombotech.com/clipboard'; // Clipboard API
     const filesUrl = 'https://negombotech.com/files';   // Files API base
 
@@ -43,11 +43,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load clipboard data
     async function loadClipboard() {
+        const clipboardList = document.getElementById('clipboardList');
+        if (!clipboardList) return;
+
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
 
-            const clipboardList = document.getElementById('clipboardList');
             clipboardList.innerHTML = ''; // Clear previous list
 
             if (data.length === 0) {
