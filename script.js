@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load clipboard data
     async function loadClipboard() {
         const clipboardList = document.getElementById('clipboardList');
-        if (!clipboardList) return;
+        if (!clipboardList) return;  // Ensure the element exists
 
         try {
             const response = await fetch(apiUrl);
