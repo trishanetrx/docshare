@@ -1,33 +1,42 @@
-const apiUrl = 'https://negombotech.com/api'; // Backend API URL
+// Base URL for the backend API
+const apiUrl = 'https://negombotech.com/api'; // Update if the backend URL changes
 
+// Add event listener to handle login form submission
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
 
+    // Collect username and password from the login form
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
     try {
-        // Send POST request to /api/login
+        // Send a POST request to the login endpoint
         const response = await fetch(`${apiUrl}/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }), // Send credentials
+            headers: { 
+                'Content-Type': 'application/json' // Ensure correct headers for JSON payload
+            },
+            body: JSON.stringify({ username, password }) // Send login credentials in JSON format
         });
 
-        const data = await response.json(); // Parse JSON response
+        // Parse the response from the backend
+        const data = await response.json();
 
+        // Handle successful login
         if (response.ok) {
-            // Login successful
-            alert('Login successful!');
-            localStorage.setItem('token', data.token); // Save JWT token
-            window.location.href = '/dashboard.html'; // Redirect after login
+            // Save the JWT token to localStorage for future authenticated requests
+            localStorage.setItem('token', data.token);
+            
+            // Notify the user and redirect to the clipboard page
+            alert('Login successful! Redirecting to your clipboard...');
+            window.location.href = '/clipboard.html'; // Adjust this path to your actual clipboard page
         } else {
-            // Login failed (e.g., 401 or 400)
-            alert(data.message || 'Login failed. Please try again.');
+            // Handle errors like invalid credentials
+            alert(data.message || 'Login failed. Please check your credentials and try again.');
         }
     } catch (error) {
-        // Handle network or other unexpected errors
-        console.error('Error:', error);
-        alert('An error occurred during login. Please try again later.');
+        // Handle unexpected errors, such as network issues
+        console.error('An error occurred during login:', error);
+        alert('An error occurred while trying to log in. Please try again later.');
     }
 });
