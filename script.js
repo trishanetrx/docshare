@@ -1,18 +1,29 @@
-const apiUrl = 'https://negombotech.com/api';
+const apiUrl = 'https://negombotech.com/api'; // Backend API URL
 
 // Clipboard functionality
 document.getElementById('saveClipboard').addEventListener('click', saveToClipboard);
 document.getElementById('clearClipboard').addEventListener('click', clearClipboard);
+window.addEventListener('load', initializeApp); // Load clipboard and files when page loads
+
+async function initializeApp() {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+        showMessage('You are not logged in. Please log in first.', 'error');
+        window.location.href = '/login.html'; // Redirect to login page if not authenticated
+        return;
+    }
+    loadClipboard();
+    loadFiles();
+}
 
 async function saveToClipboard() {
     const text = document.getElementById('clipboardInput').value;
-
     if (!text) {
         showMessage('Please enter some text to save.', 'error');
         return;
     }
 
-    const authToken = localStorage.getItem('token'); // Use token for authorization
+    const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'POST',
@@ -41,8 +52,14 @@ async function loadClipboard() {
         const response = await fetch(`${apiUrl}/clipboard`, {
             headers: { 'Authorization': `Bearer ${authToken}` },
         });
-        const data = await response.json();
 
+        if (response.status === 401) {
+            showMessage('Unauthorized. Please log in again.', 'error');
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const data = await response.json();
         const clipboardList = document.getElementById('clipboardList');
         clipboardList.innerHTML = '';
 
@@ -100,7 +117,6 @@ async function uploadFile() {
     formData.append('file', file);
 
     const authToken = localStorage.getItem('token');
-
     try {
         const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
@@ -126,8 +142,14 @@ async function loadFiles() {
         const response = await fetch(`${apiUrl}/files`, {
             headers: { 'Authorization': `Bearer ${authToken}` },
         });
-        const files = await response.json();
 
+        if (response.status === 401) {
+            showMessage('Unauthorized. Please log in again.', 'error');
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const files = await response.json();
         const fileList = document.getElementById('fileList');
         fileList.innerHTML = '';
 
@@ -190,9 +212,3 @@ function showMessage(message, type) {
         statusMessage.style.display = 'none';
     }, 3000);
 }
-
-// Initialize Clipboard and Files on Load
-window.addEventListener('load', () => {
-    loadClipboard();
-    loadFiles();
-});
