@@ -1,4 +1,5 @@
-const apiUrl = 'https://negombotech.com/api'; // Base API URL
+const apiUrl = 'https://negombotech.com/api'; // Backend API URL
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
 
@@ -6,27 +7,27 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('https://negombotech.com/login', {
+        // Send POST request to /api/login
+        const response = await fetch(`${apiUrl}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }), // Send login credentials
+            body: JSON.stringify({ username, password }), // Send credentials
         });
 
-        const data = await response.json();
+        const data = await response.json(); // Parse JSON response
 
         if (response.ok) {
-            // Save the authentication token in localStorage
-            localStorage.setItem('authToken', data.token);
-
-            // Show success message and redirect to the main page
+            // Login successful
             alert('Login successful!');
-            window.location.href = '/index.html'; // Redirect to the main page
+            localStorage.setItem('token', data.token); // Save JWT token
+            window.location.href = '/dashboard.html'; // Redirect after login
         } else {
-            // Handle login failure
-            alert(data.message || 'Invalid username or password');
+            // Login failed (e.g., 401 or 400)
+            alert(data.message || 'Login failed. Please try again.');
         }
     } catch (error) {
-        // Handle network or server errors
-        alert('An error occurred while trying to log in. Please try again later.');
+        // Handle network or other unexpected errors
+        console.error('Error:', error);
+        alert('An error occurred during login. Please try again later.');
     }
 });
