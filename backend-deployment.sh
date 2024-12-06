@@ -4,7 +4,7 @@
 echo "Updating system and installing dependencies..."
 sudo apt update -y
 sudo apt upgrade -y
-sudo apt install -y nodejs npm nginx certbot python3-certbot-nginx
+sudo apt install -y nodejs npm nginx certbot python3-certbot-nginx 
 
 # Install backend dependencies (express, cors)
 echo "Setting up backend and installing Node.js dependencies..."
@@ -12,6 +12,8 @@ mkdir -p ~/clipboard-backend
 cd ~/clipboard-backend
 npm init -y
 npm install express cors
+npm install multer
+
 
 # Create the server.js file
 cat <<EOL > ~/clipboard-backend/server.js
@@ -107,6 +109,35 @@ app.get('/files/:filename', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+EOL
+
+# Start the backend server
+echo "Starting backend server..."
+nohup node ~/clipboard-backend/server.js &
+
+# Configure NGINX to proxy requests to the backend
+echo "Configuring NGINX..."
+sudo cat <<EOL > /etc/nginx/sites-available/clipboard-backend
+server {
+    server_name negombotech.com www.negombotech.com;
+
+    # Proxy requests to the backend server
+    location / {
+        proxy_pass http://localhost:3000;  # Backend runs on port 3000
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Serve static files (uploaded files)
+    location /uploads/ {
+        root /path/to/your/project;  # Update this with your actual project path
+        try_files $uri $uri/ =404;   # Ensures the file is served from the correct location
+        add_header Cache-Control "public, max-age=3600"; # Cache files for 1 hour
+    }
+
 EOL
 
 # Create symbolic link to enable the NGINX site
