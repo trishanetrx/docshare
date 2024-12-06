@@ -1,4 +1,4 @@
-const apiUrl = 'https://negombotech.com'; // Base API URL
+const apiUrl = 'https://negombotech.com/api';
 
 // Check if the user is logged in and set UI accordingly
 function checkLoginStatus() {
