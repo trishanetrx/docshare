@@ -1,10 +1,27 @@
 const apiUrl = 'https://negombotech.com'; // Base API URL, updated to correct endpoint
 
+// Check if the user is logged in and set UI accordingly
+function checkLoginStatus() {
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+        // User is logged in
+        document.getElementById('loginButton').style.display = 'none';
+        document.getElementById('logoutButton').style.display = 'block';
+        loadClipboard();
+        loadFiles();
+    } else {
+        // User is not logged in
+        document.getElementById('loginButton').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'none';
+        document.getElementById('clipboardSection').style.display = 'none';
+        document.getElementById('fileSection').style.display = 'none';
+    }
+}
+
 // Clipboard functionality
 document.getElementById('saveButton').addEventListener('click', saveToClipboard);
 document.getElementById('loadButton').addEventListener('click', loadClipboard);
 document.getElementById('clearButton').addEventListener('click', clearClipboard);
-loadClipboard();
 
 async function saveToClipboard() {
     const text = document.getElementById('clipboardInput').value;
@@ -14,10 +31,14 @@ async function saveToClipboard() {
         return;
     }
 
+    const authToken = localStorage.getItem('authToken');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken
+            },
             body: JSON.stringify({ text }),
         });
 
@@ -34,8 +55,11 @@ async function saveToClipboard() {
 }
 
 async function loadClipboard() {
+    const authToken = localStorage.getItem('authToken');
     try {
-        const response = await fetch(`${apiUrl}/clipboard`);
+        const response = await fetch(`${apiUrl}/clipboard`, {
+            headers: { 'Authorization': authToken }
+        });
         const data = await response.json();
 
         const clipboardList = document.getElementById('clipboardList');
@@ -56,8 +80,12 @@ async function loadClipboard() {
 }
 
 async function clearClipboard() {
+    const authToken = localStorage.getItem('authToken');
     try {
-        const response = await fetch(`${apiUrl}/clipboard`, { method: 'DELETE' });
+        const response = await fetch(`${apiUrl}/clipboard`, {
+            method: 'DELETE',
+            headers: { 'Authorization': authToken }
+        });
 
         if (response.ok) {
             showMessage('Clipboard cleared!', 'success');
@@ -72,7 +100,6 @@ async function clearClipboard() {
 
 // File upload functionality
 document.getElementById('uploadButton').addEventListener('click', uploadFile);
-loadFiles();
 
 async function uploadFile() {
     const fileInput = document.getElementById('fileInput');
@@ -91,9 +118,12 @@ async function uploadFile() {
     const formData = new FormData();
     formData.append('file', file);
 
+    const authToken = localStorage.getItem('authToken');
+
     try {
         const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
+            headers: { 'Authorization': authToken },
             body: formData,
         });
 
@@ -110,8 +140,11 @@ async function uploadFile() {
 }
 
 async function loadFiles() {
+    const authToken = localStorage.getItem('authToken');
     try {
-        const response = await fetch(`${apiUrl}/files`);
+        const response = await fetch(`${apiUrl}/files`, {
+            headers: { 'Authorization': authToken }
+        });
         const files = await response.json();
 
         const fileList = document.getElementById('fileList');
@@ -137,8 +170,8 @@ async function loadFiles() {
                 deleteButton.style.color = 'white';
                 deleteButton.style.backgroundColor = 'red';
                 deleteButton.style.border = 'none';
-                deleteButton.style.padding = '3px 8px';
-                deleteButton.style.borderRadius = '4px';
+                deleteButton.style.padding = '5px 10px';
+                deleteButton.style.borderRadius = '5px';
                 deleteButton.style.cursor = 'pointer';
                 deleteButton.addEventListener('click', () => deleteFile(file));
 
@@ -152,9 +185,11 @@ async function loadFiles() {
 }
 
 async function deleteFile(filename) {
+    const authToken = localStorage.getItem('authToken');
     try {
         const response = await fetch(`${apiUrl}/files/${filename}`, {
             method: 'DELETE',
+            headers: { 'Authorization': authToken }
         });
 
         if (response.ok) {
@@ -168,6 +203,7 @@ async function deleteFile(filename) {
     }
 }
 
+// Show status message
 function showMessage(message, type) {
     const statusMessage = document.getElementById('statusMessage');
     statusMessage.textContent = message;
@@ -178,3 +214,16 @@ function showMessage(message, type) {
         statusMessage.style.display = 'none';
     }, 3000);
 }
+
+// Login and logout functionality
+document.getElementById('loginButton').addEventListener('click', () => {
+    window.location.href = '/login.html'; // Redirect to login page
+});
+
+document.getElementById('logoutButton').addEventListener('click', () => {
+    localStorage.removeItem('authToken');
+    checkLoginStatus(); // Update UI after logout
+});
+
+// Check login status when the page loads
+checkLoginStatus();
