@@ -9,6 +9,7 @@ sudo apt install -y nodejs npm nginx certbot python3-certbot-nginx
 # Install backend dependencies (express, cors)
 echo "Setting up backend and installing Node.js dependencies..."
 mkdir -p ~/clipboard-backend
+mkdir -p ~/clipboard-backend/uploads
 cd ~/clipboard-backend
 npm init -y
 npm install express cors
