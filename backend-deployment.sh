@@ -14,7 +14,6 @@ npm init -y
 npm install express cors
 npm install multer
 
-
 # Create the server.js file
 cat <<EOL > ~/clipboard-backend/server.js
 const express = require('express');
@@ -125,16 +124,16 @@ server {
     location / {
         proxy_pass http://localhost:3000;  # Backend runs on port 3000
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
     }
 
     # Serve static files (uploaded files)
     location /uploads/ {
-        root /path/to/your/project;  # Replace with the actual project path
-        try_files $uri =404;         # Correctly check the requested file
+        alias /home/$(whoami)/clipboard-backend/uploads;  # Set correct path to uploads folder
+        try_files \$uri \$uri/ =404;         # Correctly check the requested file
         add_header Cache-Control "public, max-age=3600"; # Cache files for 1 hour
     }
 
