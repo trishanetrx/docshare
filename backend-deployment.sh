@@ -14,6 +14,7 @@ cd ~/clipboard-backend
 npm init -y
 npm install express cors
 npm install multer
+npm install -g pm2
 
 # Create the server.js file
 cat <<EOL > ~/clipboard-backend/server.js
@@ -112,9 +113,8 @@ app.listen(PORT, () => {
 });
 EOL
 
-# Start the backend server
-echo "Starting backend server..."
-nohup node ~/clipboard-backend/server.js &
+echo "Starting backend server using pm2..."
+pm2 start ~/clipboard-backend/server.js --name clipboard-backend
 
 # Configure NGINX to proxy requests to the backend
 echo "Configuring NGINX..."
