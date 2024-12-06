@@ -83,7 +83,7 @@ async function uploadFile() {
         return;
     }
 
-    if (file.size > 50 * 1024 * 1024) { // 10 MB file size limit
+    if (file.size > 50 * 1024 * 1024) {
         showMessage('File size exceeds 50 MB.', 'error');
         return;
     }
@@ -122,16 +122,49 @@ async function loadFiles() {
         } else {
             files.forEach((file) => {
                 const li = document.createElement('li');
+
+                // File link
                 const link = document.createElement('a');
                 link.href = `${apiUrl}/files/${file}`;
                 link.textContent = file;
                 link.target = '_blank';
+                link.style.marginRight = '10px';
                 li.appendChild(link);
+
+                // Delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.style.color = 'white';
+                deleteButton.style.backgroundColor = 'red';
+                deleteButton.style.border = 'none';
+                deleteButton.style.padding = '5px 10px';
+                deleteButton.style.borderRadius = '5px';
+                deleteButton.style.cursor = 'pointer';
+                deleteButton.addEventListener('click', () => deleteFile(file));
+
+                li.appendChild(deleteButton);
                 fileList.appendChild(li);
             });
         }
     } catch (error) {
         showMessage('An error occurred while loading files.', 'error');
+    }
+}
+
+async function deleteFile(filename) {
+    try {
+        const response = await fetch(`${apiUrl}/files/${filename}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            showMessage('File deleted successfully!', 'success');
+            loadFiles();
+        } else {
+            showMessage('Failed to delete the file.', 'error');
+        }
+    } catch (error) {
+        showMessage('An error occurred while deleting the file.', 'error');
     }
 }
 
