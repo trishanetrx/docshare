@@ -17,8 +17,11 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     }
 
     try {
+        // Set the correct URL for your backend API
+        const apiUrl = 'https://negombotech.com/register';
+
         // Send the registration data to the backend
-        const response = await fetch('http://localhost:3000/register', { // Update URL if necessary
+        const response = await fetch(apiUrl, { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
