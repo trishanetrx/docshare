@@ -29,7 +29,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             
             // Notify the user and redirect to the clipboard page
             alert('Login successful! Redirecting to your clipboard...');
-            window.location.href = '/clipboard.html'; // Adjust this path to your actual clipboard page
+            window.location.href = '/index.html'; // Adjust this path to your actual clipboard page
         } else {
             // Handle errors like invalid credentials
             alert(data.message || 'Login failed. Please check your credentials and try again.');
