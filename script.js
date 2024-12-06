@@ -1,29 +1,8 @@
 const apiUrl = 'https://negombotech.com/api';
 
-// Check if the user is logged in and set UI accordingly
-function checkLoginStatus() {
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-        // User is logged in
-        document.getElementById('loginButton').style.display = 'none';
-        document.getElementById('logoutButton').style.display = 'block';
-        document.getElementById('clipboardSection').classList.remove('hidden');
-        document.getElementById('fileSection').classList.remove('hidden');
-        loadClipboard();
-        loadFiles();
-    } else {
-        // User is not logged in
-        document.getElementById('loginButton').style.display = 'block';
-        document.getElementById('logoutButton').style.display = 'none';
-        document.getElementById('clipboardSection').classList.add('hidden');
-        document.getElementById('fileSection').classList.add('hidden');
-    }
-}
-
 // Clipboard functionality
-document.getElementById('saveButton').addEventListener('click', saveToClipboard);
-document.getElementById('loadButton').addEventListener('click', loadClipboard);
-document.getElementById('clearButton').addEventListener('click', clearClipboard);
+document.getElementById('saveClipboard').addEventListener('click', saveToClipboard);
+document.getElementById('clearClipboard').addEventListener('click', clearClipboard);
 
 async function saveToClipboard() {
     const text = document.getElementById('clipboardInput').value;
@@ -33,13 +12,13 @@ async function saveToClipboard() {
         return;
     }
 
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('token'); // Use token for authorization
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': authToken
+                'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify({ text }),
         });
@@ -57,10 +36,10 @@ async function saveToClipboard() {
 }
 
 async function loadClipboard() {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` },
         });
         const data = await response.json();
 
@@ -82,11 +61,11 @@ async function loadClipboard() {
 }
 
 async function clearClipboard() {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'DELETE',
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` },
         });
 
         if (response.ok) {
@@ -101,7 +80,7 @@ async function clearClipboard() {
 }
 
 // File upload functionality
-document.getElementById('uploadButton').addEventListener('click', uploadFile);
+document.getElementById('uploadFile').addEventListener('click', uploadFile);
 
 async function uploadFile() {
     const fileInput = document.getElementById('fileInput');
@@ -120,12 +99,12 @@ async function uploadFile() {
     const formData = new FormData();
     formData.append('file', file);
 
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('token');
 
     try {
         const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
-            headers: { 'Authorization': authToken },
+            headers: { 'Authorization': `Bearer ${authToken}` },
             body: formData,
         });
 
@@ -142,10 +121,10 @@ async function uploadFile() {
 }
 
 async function loadFiles() {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/files`, {
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` },
         });
         const files = await response.json();
 
@@ -163,18 +142,13 @@ async function loadFiles() {
                 link.href = `${apiUrl}/files/${file}`;
                 link.textContent = file;
                 link.target = '_blank';
-                link.style.marginRight = '10px';
+                link.className = 'text-blue-600 hover:underline';
                 li.appendChild(link);
 
                 // Delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
-                deleteButton.style.color = 'white';
-                deleteButton.style.backgroundColor = 'red';
-                deleteButton.style.border = 'none';
-                deleteButton.style.padding = '5px 10px';
-                deleteButton.style.borderRadius = '5px';
-                deleteButton.style.cursor = 'pointer';
+                deleteButton.className = 'ml-4 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700';
                 deleteButton.addEventListener('click', () => deleteFile(file));
 
                 li.appendChild(deleteButton);
@@ -187,11 +161,11 @@ async function loadFiles() {
 }
 
 async function deleteFile(filename) {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/files/${filename}`, {
             method: 'DELETE',
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` },
         });
 
         if (response.ok) {
@@ -217,15 +191,8 @@ function showMessage(message, type) {
     }, 3000);
 }
 
-// Login and logout functionality
-document.getElementById('loginButton').addEventListener('click', () => {
-    window.location.href = '/login.html'; // Redirect to login page
+// Initialize Clipboard and Files on Load
+window.addEventListener('load', () => {
+    loadClipboard();
+    loadFiles();
 });
-
-document.getElementById('logoutButton').addEventListener('click', () => {
-    localStorage.removeItem('authToken');
-    checkLoginStatus(); // Update UI after logout
-});
-
-// Check login status when the page loads
-checkLoginStatus();
