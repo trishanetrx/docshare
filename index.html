@@ -3,50 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Clipboard</title>
-    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Clipboard App</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
 </head>
-<body class="bg-gray-100 font-roboto">
-    <!-- Header -->
-    <header class="bg-blue-600 text-white p-4">
-        <h1 class="text-center text-2xl font-bold">Online Clipboard</h1>
+<body>
+    <header>
+        <h1>Welcome to the Clipboard App</h1>
+        <nav>
+            <ul>
+                <li><a href="/login.html">Login</a></li>
+                <li><a href="/register.html">Register</a></li>
+                <li><a href="/dashboard.html">Dashboard</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto mt-8">
-        <!-- Authentication Section -->
-        <div id="authSection" class="flex justify-end space-x-4 mb-4">
-            <button id="loginButton" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
-            <button id="logoutButton" class="bg-red-500 text-white px-4 py-2 rounded hidden">Logout</button>
-        </div>
-
-        <!-- Clipboard Section (Visible when logged in) -->
-        <section id="clipboardSection" class="hidden">
-            <h2 class="text-lg font-bold mb-2">Clipboard</h2>
-            <textarea id="clipboardInput" class="w-full p-2 border rounded mb-4" placeholder="Paste text here"></textarea>
-            <div class="flex space-x-4">
-                <button id="saveButton" class="bg-green-500 text-white px-4 py-2 rounded">Save</button>
-                <button id="loadButton" class="bg-blue-500 text-white px-4 py-2 rounded">Load</button>
-                <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded">Clear</button>
-            </div>
-            <ul id="clipboardList" class="mt-4 list-disc pl-5">
-                <!-- Dynamic content will be loaded here -->
-            </ul>
+    <main>
+        <section>
+            <h2>Clipboard Features</h2>
+            <p>
+                This app helps you store and manage your clipboard data securely. Easily copy and paste 
+                across devices with our cloud-powered clipboard solution.
+            </p>
         </section>
 
-        <!-- File Upload Section -->
-        <section id="fileSection" class="hidden mt-8">
-            <h2 class="text-lg font-bold mb-2">File Upload</h2>
-            <input type="file" id="fileInput" class="mb-4 p-2 border rounded w-full" />
-            <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded">Upload</button>
-            <h3 class="text-lg font-semibold mt-4">Uploaded Files:</h3>
-            <ul id="fileList" class="mt-2 list-disc pl-5">
-                <!-- Dynamic content will be loaded here -->
-            </ul>
+        <section>
+            <h2>Getting Started</h2>
+            <p>
+                To start using the Clipboard App, <a href="/register.html">register here</a>. If you already 
+                have an account, <a href="/login.html">log in</a> to access your clipboard.
+            </p>
         </section>
     </main>
 
-    <!-- JavaScript -->
-    <script src="script.js"></script>
+    <footer>
+        <p>&copy; 2024 Clipboard App. All rights reserved.</p>
+    </footer>
 </body>
 </html>
