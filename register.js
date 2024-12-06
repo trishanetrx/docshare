@@ -1,62 +1,35 @@
-document.getElementById('registerForm').addEventListener('submit', async function(event) {
-    event.preventDefault();  // Prevent form from submitting normally
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
 
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-    const statusMessage = document.getElementById('statusMessage');
-    statusMessage.style.display = 'none';  // Hide the status message initially
-
-    // Basic client-side validation for password match
+    // Validate that password and confirmation match
     if (password !== confirmPassword) {
-        statusMessage.textContent = 'Passwords do not match.';
-        statusMessage.style.color = 'red';
-        statusMessage.style.display = 'block';
+        alert('Passwords do not match. Please try again.');
         return;
     }
 
-    // Display loading message while waiting for the request
-    statusMessage.textContent = 'Registering user...';
-    statusMessage.style.color = 'blue';
-    statusMessage.style.display = 'block';
-
     try {
-        // Set the correct URL for your backend API
-        const apiUrl = 'https://negombotech.com/register';
-
-        // Send the registration data to the backend
-        const response = await fetch(apiUrl, { 
+        const response = await fetch('https://negombotech.com/register', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }), // Send registration data
         });
 
-        // Parse the response from the backend
         const data = await response.json();
 
-        // Handle successful response
         if (response.ok) {
-            statusMessage.textContent = 'Registration successful!';
-            statusMessage.style.color = 'green';
-            statusMessage.style.display = 'block';
-
-            // Redirect to login page after a short delay
-            setTimeout(() => {
-                window.location.href = 'login.html';  // Redirect to login page
-            }, 2000);
+            // Show success message and redirect to the login page
+            alert('Registration successful! Redirecting to login...');
+            window.location.href = '/login.html'; // Redirect to login page
         } else {
-            // Show error message if the registration fails
-            statusMessage.textContent = data.message || 'Registration failed. Please try again.';
-            statusMessage.style.color = 'red';
-            statusMessage.style.display = 'block';
+            // Handle registration failure
+            alert(data.message || 'Registration failed. Please try again.');
         }
     } catch (error) {
         // Handle network or server errors
-        statusMessage.textContent = 'An error occurred. Please check your internet connection and try again.';
-        statusMessage.style.color = 'red';
-        statusMessage.style.display = 'block';
+        alert('An error occurred while trying to register. Please try again later.');
     }
 });
