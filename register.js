@@ -1,3 +1,4 @@
+const apiUrl = 'https://negombotech.com/api'; // Base API URL
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
 
