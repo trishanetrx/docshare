@@ -8,13 +8,18 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     const statusMessage = document.getElementById('statusMessage');
     statusMessage.style.display = 'none';  // Hide the status message initially
 
-    // Validate if the passwords match
+    // Basic client-side validation for password match
     if (password !== confirmPassword) {
         statusMessage.textContent = 'Passwords do not match.';
         statusMessage.style.color = 'red';
         statusMessage.style.display = 'block';
         return;
     }
+
+    // Display loading message while waiting for the request
+    statusMessage.textContent = 'Registering user...';
+    statusMessage.style.color = 'blue';
+    statusMessage.style.display = 'block';
 
     try {
         // Set the correct URL for your backend API
@@ -29,27 +34,28 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             body: JSON.stringify({ username, password })
         });
 
+        // Parse the response from the backend
         const data = await response.json();
 
+        // Handle successful response
         if (response.ok) {
-            // Show success message and redirect
             statusMessage.textContent = 'Registration successful!';
             statusMessage.style.color = 'green';
             statusMessage.style.display = 'block';
 
-            // Redirect to login page after success
+            // Redirect to login page after a short delay
             setTimeout(() => {
-                window.location.href = 'login.html'; // Redirect to login page
+                window.location.href = 'login.html';  // Redirect to login page
             }, 2000);
         } else {
-            // Show error message
-            statusMessage.textContent = data.message || 'Registration failed.';
+            // Show error message if the registration fails
+            statusMessage.textContent = data.message || 'Registration failed. Please try again.';
             statusMessage.style.color = 'red';
             statusMessage.style.display = 'block';
         }
     } catch (error) {
         // Handle network or server errors
-        statusMessage.textContent = 'An error occurred. Please try again.';
+        statusMessage.textContent = 'An error occurred. Please check your internet connection and try again.';
         statusMessage.style.color = 'red';
         statusMessage.style.display = 'block';
     }
