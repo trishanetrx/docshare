@@ -1,49 +1,31 @@
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();  // Prevent form from submitting normally
+    e.preventDefault(); // Prevent default form submission behavior
 
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    // Show loading or error message
-    const statusMessage = document.getElementById('statusMessage');
-    statusMessage.style.display = 'none';
-
-    // Validate input
-    if (!username || !password) {
-        statusMessage.textContent = 'Please fill in both fields';
-        statusMessage.style.display = 'block';
-        statusMessage.style.color = 'red';
-        return;
-    }
-
     try {
-        // Send the login request to the backend
         const response = await fetch('https://negombotech.com/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password }), // Send login credentials
         });
 
         const data = await response.json();
-        if (response.ok) {
-            // Save the token in localStorage
-            localStorage.setItem('authToken', data.token);  // Save JWT token
-            statusMessage.textContent = 'Login successful! Redirecting...';
-            statusMessage.style.display = 'block';
-            statusMessage.style.color = 'green';
 
-            // Redirect to the protected page (e.g., dashboard.html)
-            setTimeout(() => {
-                window.location.href = '/dashboard.html';  // Redirect to your main dashboard page
-            }, 2000);
+        if (response.ok) {
+            // Save the authentication token in localStorage
+            localStorage.setItem('authToken', data.token);
+
+            // Show success message and redirect to the main page
+            alert('Login successful!');
+            window.location.href = '/index.html'; // Redirect to the main page
         } else {
-            statusMessage.textContent = data.message || 'Login failed';
-            statusMessage.style.display = 'block';
-            statusMessage.style.color = 'red';
+            // Handle login failure
+            alert(data.message || 'Invalid username or password');
         }
     } catch (error) {
-        statusMessage.textContent = 'An error occurred while logging in.';
-        statusMessage.style.display = 'block';
-        statusMessage.style.color = 'red';
+        // Handle network or server errors
+        alert('An error occurred while trying to log in. Please try again later.');
     }
 });
