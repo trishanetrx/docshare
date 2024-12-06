@@ -3,43 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Clipboard App</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <meta name="description" content="An online clipboard application to save and load text easily.">
+    <meta name="keywords" content="clipboard, online, text, save, load">
+    <title>Online Clipboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body>
-    <header>
-        <h1>Welcome to the Clipboard App</h1>
-        <nav>
-            <ul>
-                <li><a href="/login.html">Login</a></li>
-                <li><a href="/register.html">Register</a></li>
-                <li><a href="/dashboard.html">Dashboard</a></li>
-            </ul>
+<body class="bg-gray-100 font-roboto">
+    <!-- Header Section -->
+    <header class="bg-blue-600 text-white p-4">
+        <h1 class="text-2xl font-bold text-center">VentiqoTech - Online Clipboard</h1>
+        <nav class="flex justify-center space-x-4 mt-2">
+            <a href="/login.html" class="text-white hover:underline">Login</a>
+            <a href="/register.html" class="text-white hover:underline">Register</a>
+            <a href="/dashboard.html" class="text-white hover:underline">Dashboard</a>
         </nav>
     </header>
 
-    <main>
-        <section>
-            <h2>Clipboard Features</h2>
-            <p>
-                This app helps you store and manage your clipboard data securely. Easily copy and paste 
-                across devices with our cloud-powered clipboard solution.
-            </p>
-        </section>
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <!-- Input Area -->
+        <textarea id="clipboardInput" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Type or paste your text here..."></textarea>
 
-        <section>
-            <h2>Getting Started</h2>
-            <p>
-                To start using the Clipboard App, <a href="/register.html">register here</a>. If you already 
-                have an account, <a href="/login.html">log in</a> to access your clipboard.
-            </p>
-        </section>
+        <!-- Buttons -->
+        <div class="flex justify-center space-x-4 mb-4">
+            <button id="saveButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <i class="fas fa-save"></i> Save to Clipboard
+            </button>
+            <button id="loadButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
+                <i class="fas fa-upload"></i> Load Clipboard
+            </button>
+            <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
+                <i class="fas fa-trash-alt"></i> Clear Clipboard
+            </button>
+        </div>
+
+        <!-- Feedback Status Message -->
+        <div id="statusMessage" class="text-center text-lg font-semibold mb-4 hidden"></div>
+
+        <!-- Clipboard List -->
+        <h2 class="text-xl font-semibold mb-2">Saved Clipboard Data:</h2>
+        <ul id="clipboardList" class="list-disc pl-5">
+            <!-- Dynamic Clipboard Data Will Be Injected Here -->
+        </ul>
+
+        <!-- File Upload Section -->
+        <h2 class="text-xl font-semibold mb-2">File Upload:</h2>
+        <input type="file" id="fileInput" class="mb-4 p-2 border border-gray-300 rounded w-full" />
+        <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Upload File</button>
+
+        <!-- File List -->
+        <h2 class="text-xl font-semibold mb-2">Uploaded Files:</h2>
+        <ul id="fileList" class="list-disc pl-5">
+            <!-- Dynamic File List Will Be Injected Here -->
+        </ul>
     </main>
 
-    <footer>
-        <p>&copy; 2024 Clipboard App. All rights reserved.</p>
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white text-center p-4 mt-4">
+        <p>&copy; 2024 VentiqoTech. All rights reserved.</p>
     </footer>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>
