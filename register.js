@@ -1,4 +1,5 @@
-const apiUrl = 'https://negombotech.com/api'; // Base API URL
+const apiUrl = 'https://clipboard.negombotech.com/api'; // Use the correct API base URL
+
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
 
@@ -13,7 +14,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     }
 
     try {
-        const response = await fetch('https://negombotech.com/register', {
+        const response = await fetch(`${apiUrl}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }), // Send registration data
