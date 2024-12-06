@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register User</title>
+    <meta name="description" content="User registration for Online Clipboard">
+    <meta name="keywords" content="register, sign up, clipboard, online">
+    <title>Register - Online Clipboard</title>
+    
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Register</h1>
-    <form id="registerForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <button type="submit">Register</button>
-    </form>
+<body class="bg-gray-100 font-roboto flex justify-center items-center h-screen">
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form from submitting normally
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-semibold text-center mb-6">Create an Account</h2>
+        
+        <!-- Registration Form -->
+        <form id="registerForm">
+            <div class="mb-4">
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="username" name="username" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your username" required>
+            </div>
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" name="password" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your password" required>
+            </div>
 
-            // Send a POST request to the backend to register the user
-            fetch('http://localhost:3000/register', { // Change the URL to your actual backend URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message); // Show success or error message
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    </script>
+            <div class="mb-4">
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Confirm your password" required>
+            </div>
+
+            <!-- Status Message -->
+            <div id="statusMessage" class="text-center text-lg font-semibold mb-4" style="display: none;"></div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Register
+            </button>
+        </form>
+
+        <p class="mt-4 text-center text-sm text-gray-600">Already have an account? <a href="login.html" class="text-blue-500 hover:underline">Login</a></p>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="register.js"></script>
 </body>
 </html>
