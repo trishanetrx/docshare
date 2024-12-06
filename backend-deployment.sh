@@ -31,6 +31,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files
+app.use(bodyParser.json({ limit: '70mb' }));  // Increase JSON size limit
 
 // Memory storage for clipboard data
 let clipboardData = [];
@@ -120,6 +121,7 @@ echo "Configuring NGINX..."
 sudo cat <<EOL > /etc/nginx/sites-available/clipboard-backend
 server {
     server_name negombotech.com www.negombotech.com;
+    client_max_body_size 70M;
 
     # Proxy requests to the backend server
     location / {
