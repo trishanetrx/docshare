@@ -138,7 +138,7 @@ async function loadFiles() {
                 deleteButton.style.backgroundColor = 'red';
                 deleteButton.style.border = 'none';
                 deleteButton.style.padding = '3px 8px';
-                deleteButton.style.borderRadius = '5px';
+                deleteButton.style.borderRadius = '4px';
                 deleteButton.style.cursor = 'pointer';
                 deleteButton.addEventListener('click', () => deleteFile(file));
 
