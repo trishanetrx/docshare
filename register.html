@@ -3,48 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="User registration for Online Clipboard">
-    <meta name="keywords" content="register, sign up, clipboard, online">
+    <meta name="description" content="Registration page for Online Clipboard">
+    <meta name="keywords" content="register, clipboard, online">
     <title>Register - Online Clipboard</title>
-    
-    <!-- TailwindCSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- TailwindCSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-roboto flex justify-center items-center h-screen">
+<body class="bg-gray-100 flex justify-center items-center h-screen">
 
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 class="text-2xl font-semibold text-center mb-6">Create an Account</h2>
-        
-        <!-- Registration Form -->
+    <!-- Registration Form -->
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h2 class="text-2xl font-bold text-center mb-4">Register</h2>
         <form id="registerForm">
-            <div class="mb-4">
-                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                <input type="text" id="username" name="username" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your username" required>
-            </div>
+            <!-- Username Input -->
+            <label for="username" class="block text-gray-700">Username</label>
+            <input type="text" id="username" class="w-full p-2 border rounded mb-4" placeholder="Enter your username" required>
 
-            <div class="mb-4">
-                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                <input type="password" id="password" name="password" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your password" required>
-            </div>
+            <!-- Password Input -->
+            <label for="password" class="block text-gray-700">Password</label>
+            <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
 
-            <div class="mb-4">
-                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" class="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Confirm your password" required>
-            </div>
-
-            <!-- Status Message -->
-            <div id="statusMessage" class="text-center text-lg font-semibold mb-4" style="display: none;"></div>
+            <!-- Confirm Password Input -->
+            <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
+            <input type="password" id="confirmPassword" class="w-full p-2 border rounded mb-4" placeholder="Confirm your password" required>
 
             <!-- Submit Button -->
-            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                Register
-            </button>
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Register</button>
         </form>
 
-        <p class="mt-4 text-center text-sm text-gray-600">Already have an account? <a href="login.html" class="text-blue-500 hover:underline">Login</a></p>
+        <!-- Redirect to Login -->
+        <p class="mt-4 text-center">Already have an account? <a href="/login.html" class="text-blue-500">Login</a></p>
     </div>
 
-    <!-- External JavaScript -->
+    <!-- JavaScript -->
     <script src="register.js"></script>
 </body>
 </html>
