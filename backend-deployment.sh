@@ -51,7 +51,7 @@ const storage = multer.diskStorage({
 // Configure multer with the custom storage
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit
 });
 
 // Clipboard API Routes
