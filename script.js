@@ -83,8 +83,8 @@ async function uploadFile() {
         return;
     }
 
-    if (file.size > 10 * 1024 * 1024) { // 10 MB file size limit
-        showMessage('File size exceeds 10 MB.', 'error');
+    if (file.size > 50 * 1024 * 1024) { // 10 MB file size limit
+        showMessage('File size exceeds 50 MB.', 'error');
         return;
     }
 
