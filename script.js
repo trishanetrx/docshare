@@ -1,4 +1,4 @@
-const apiUrl = 'https://negombotech.com'; // Base API URL, updated to correct endpoint
+const apiUrl = 'https://negombotech.com'; // Base API URL
 
 // Check if the user is logged in and set UI accordingly
 function checkLoginStatus() {
@@ -7,14 +7,16 @@ function checkLoginStatus() {
         // User is logged in
         document.getElementById('loginButton').style.display = 'none';
         document.getElementById('logoutButton').style.display = 'block';
+        document.getElementById('clipboardSection').classList.remove('hidden');
+        document.getElementById('fileSection').classList.remove('hidden');
         loadClipboard();
         loadFiles();
     } else {
         // User is not logged in
         document.getElementById('loginButton').style.display = 'block';
         document.getElementById('logoutButton').style.display = 'none';
-        document.getElementById('clipboardSection').style.display = 'none';
-        document.getElementById('fileSection').style.display = 'none';
+        document.getElementById('clipboardSection').classList.add('hidden');
+        document.getElementById('fileSection').classList.add('hidden');
     }
 }
 
