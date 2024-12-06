@@ -133,11 +133,15 @@ server {
 
     # Serve static files (uploaded files)
     location /uploads/ {
-        root /path/to/your/project;  # Update this with your actual project path
-        try_files $uri $uri/ =404;   # Ensures the file is served from the correct location
+        root /path/to/your/project;  # Replace with the actual project path
+        try_files $uri =404;         # Correctly check the requested file
         add_header Cache-Control "public, max-age=3600"; # Cache files for 1 hour
     }
 
+    # Optional: Add error logging
+    error_log /var/log/nginx/negombotech_error.log;
+    access_log /var/log/nginx/negombotech_access.log;
+}
 EOL
 
 # Create symbolic link to enable the NGINX site
