@@ -32,12 +32,7 @@
 
             <!-- Confirm Password Input -->
             <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
-            <div class="relative">
-                <input type="password" id="confirmPassword" class="w-full p-2 border rounded mb-4" placeholder="Confirm your password" required>
-                <button type="button" id="toggleConfirmPassword" class="absolute right-2 top-3 text-gray-500">
-                    <i id="confirmPasswordIcon" class="fas fa-eye"></i>
-                </button>
-            </div>
+            <input type="password" id="confirmPassword" class="w-full p-2 border rounded mb-4" placeholder="Confirm your password" required>
 
             <!-- Submit Button -->
             <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Register</button>
@@ -61,21 +56,6 @@
                 passwordInput.type = 'password';
                 passwordIcon.classList.remove('fa-eye-slash');
                 passwordIcon.classList.add('fa-eye');
-            }
-        });
-
-        document.getElementById('toggleConfirmPassword').addEventListener('click', () => {
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            const confirmPasswordIcon = document.getElementById('confirmPasswordIcon');
-
-            if (confirmPasswordInput.type === 'password') {
-                confirmPasswordInput.type = 'text';
-                confirmPasswordIcon.classList.remove('fa-eye');
-                confirmPasswordIcon.classList.add('fa-eye-slash');
-            } else {
-                confirmPasswordInput.type = 'password';
-                confirmPasswordIcon.classList.remove('fa-eye-slash');
-                confirmPasswordIcon.classList.add('fa-eye');
             }
         });
     </script>
