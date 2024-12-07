@@ -1,10 +1,9 @@
-const apiUrl = 'https://negombotech.com/api';
+const apiUrl = 'https://negombotech.com/api'; // Base API URL
 
 // Check if the user is logged in and set UI accordingly
 function checkLoginStatus() {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
-        // User is logged in
         document.getElementById('loginButton').style.display = 'none';
         document.getElementById('logoutButton').style.display = 'block';
         document.getElementById('clipboardSection').classList.remove('hidden');
@@ -12,7 +11,6 @@ function checkLoginStatus() {
         loadClipboard();
         loadFiles();
     } else {
-        // User is not logged in
         document.getElementById('loginButton').style.display = 'block';
         document.getElementById('logoutButton').style.display = 'none';
         document.getElementById('clipboardSection').classList.add('hidden');
@@ -39,7 +37,7 @@ async function saveToClipboard() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': authToken
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({ text }),
         });
@@ -60,7 +58,7 @@ async function loadClipboard() {
     const authToken = localStorage.getItem('authToken');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const data = await response.json();
 
@@ -86,7 +84,7 @@ async function clearClipboard() {
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'DELETE',
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
         if (response.ok) {
@@ -125,7 +123,7 @@ async function uploadFile() {
     try {
         const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
-            headers: { 'Authorization': authToken },
+            headers: { 'Authorization': `Bearer ${authToken}` },
             body: formData,
         });
 
@@ -145,7 +143,7 @@ async function loadFiles() {
     const authToken = localStorage.getItem('authToken');
     try {
         const response = await fetch(`${apiUrl}/files`, {
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const files = await response.json();
 
@@ -158,9 +156,9 @@ async function loadFiles() {
             files.forEach((file) => {
                 const li = document.createElement('li');
 
-                // File link with token in the URL
+                // File link
                 const link = document.createElement('a');
-                link.href = `${apiUrl}/files/${file}?token=${authToken}`; // Add token as a query parameter
+                link.href = `${apiUrl}/files/${file}?token=${authToken}`;
                 link.textContent = file;
                 link.target = '_blank';
                 link.style.marginRight = '10px';
@@ -191,7 +189,7 @@ async function deleteFile(filename) {
     try {
         const response = await fetch(`${apiUrl}/files/${filename}`, {
             method: 'DELETE',
-            headers: { 'Authorization': authToken }
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
         if (response.ok) {
