@@ -104,3 +104,30 @@ li button {
 li button:hover {
     background-color: darkred; /* Darker red on hover */
 }
+
+/* New styles for the view password toggle button */
+#togglePassword {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    top: 50%; /* Vertically center */
+    right: 10px; /* Adjust spacing from the right */
+    transform: translateY(-50%); /* Ensure proper centering */
+    color: var(--text-color-light);
+}
+
+#togglePassword:hover {
+    color: var(--primary-color); /* Highlight on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
+
+    textarea {
+        height: 100px;
+    }
+}
