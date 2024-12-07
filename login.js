@@ -1,5 +1,21 @@
 const apiUrl = 'https://negombotech.com/api'; // Define the API base URL
 
+// Add toggle password visibility functionality
+document.getElementById('togglePassword').addEventListener('click', () => {
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.classList.remove('fa-eye');
+        passwordIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        passwordIcon.classList.remove('fa-eye-slash');
+        passwordIcon.classList.add('fa-eye');
+    }
+});
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent default form submission
 
