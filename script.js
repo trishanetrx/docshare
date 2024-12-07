@@ -1,25 +1,63 @@
-const apiUrl = 'https://negombotech.com/api'; // Backend API URL
+const apiUrl = 'https://negombotech.com/api';
 
-// Clipboard functionality
-document.getElementById('saveClipboard').addEventListener('click', saveToClipboard);
-document.getElementById('clearClipboard').addEventListener('click', clearClipboard);
-window.addEventListener('load', initializeApp); // Load clipboard and files when page loads
-
-async function initializeApp() {
+// Check if the user is logged in
+function checkLoginStatus() {
     const authToken = localStorage.getItem('token');
     if (!authToken) {
-        showMessage('You are not logged in. Please log in first.', 'error');
-        window.location.href = '/login.html'; // Redirect to login page if not authenticated
-        return;
+        alert('You are not logged in. Redirecting...');
+        window.location.href = '/login.html';
     }
-    loadClipboard();
-    loadFiles();
 }
 
-async function saveToClipboard() {
+// Display status messages
+function showMessage(message, type) {
+    const statusMessage = document.getElementById('statusMessage');
+    if (!statusMessage) {
+        console.error('Status message element not found.');
+        return;
+    }
+
+    statusMessage.textContent = message;
+    statusMessage.classList.remove('hidden');
+    statusMessage.style.color = type === 'success' ? 'green' : 'red';
+
+    setTimeout(() => {
+        statusMessage.classList.add('hidden');
+    }, 3000);
+}
+
+// Load clipboard data
+async function loadClipboard() {
+    const authToken = localStorage.getItem('token');
+    try {
+        const response = await fetch(`${apiUrl}/clipboard`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await response.json();
+
+        const clipboardList = document.getElementById('clipboardList');
+        clipboardList.innerHTML = '';
+
+        if (data.length === 0) {
+            clipboardList.innerHTML = '<li class="text-gray-500">No clipboard data available.</li>';
+        } else {
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                clipboardList.appendChild(li);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading clipboard data:', error);
+        showMessage('Error loading clipboard data.', 'error');
+    }
+}
+
+// Save clipboard data
+document.getElementById('saveClipboard').addEventListener('click', async () => {
     const text = document.getElementById('clipboardInput').value;
     if (!text) {
-        showMessage('Please enter some text to save.', 'error');
+        showMessage('Please enter some text.', 'error');
         return;
     }
 
@@ -29,186 +67,45 @@ async function saveToClipboard() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`,
+                'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({ text })
         });
 
         if (response.ok) {
-            showMessage('Text saved to clipboard!', 'success');
+            showMessage('Text saved successfully!', 'success');
             document.getElementById('clipboardInput').value = '';
-            loadClipboard();
+            await loadClipboard();
         } else {
             showMessage('Failed to save text.', 'error');
         }
     } catch (error) {
-        showMessage('An error occurred while saving text.', 'error');
+        console.error('Error saving to clipboard:', error);
+        showMessage('Error saving clipboard data.', 'error');
     }
-}
+});
 
-async function loadClipboard() {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${apiUrl}/clipboard`, {
-            headers: { 'Authorization': `Bearer ${authToken}` },
-        });
-
-        if (response.status === 401) {
-            showMessage('Unauthorized. Please log in again.', 'error');
-            window.location.href = '/login.html';
-            return;
-        }
-
-        const data = await response.json();
-        const clipboardList = document.getElementById('clipboardList');
-        clipboardList.innerHTML = '';
-
-        if (data.length === 0) {
-            clipboardList.innerHTML = '<li class="text-gray-500">No clipboard data available.</li>';
-        } else {
-            data.forEach((item) => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                clipboardList.appendChild(li);
-            });
-        }
-    } catch (error) {
-        showMessage('An error occurred while loading clipboard data.', 'error');
-    }
-}
-
-async function clearClipboard() {
+// Clear clipboard data
+document.getElementById('clearClipboard').addEventListener('click', async () => {
     const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` },
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
         if (response.ok) {
             showMessage('Clipboard cleared!', 'success');
-            loadClipboard();
+            await loadClipboard();
         } else {
             showMessage('Failed to clear clipboard.', 'error');
         }
     } catch (error) {
-        showMessage('An error occurred while clearing clipboard.', 'error');
+        console.error('Error clearing clipboard data:', error);
+        showMessage('Error clearing clipboard.', 'error');
     }
-}
+});
 
-// File upload functionality
-document.getElementById('uploadFile').addEventListener('click', uploadFile);
-
-async function uploadFile() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-
-    if (!file) {
-        showMessage('Please select a file to upload.', 'error');
-        return;
-    }
-
-    if (file.size > 50 * 1024 * 1024) {
-        showMessage('File size exceeds 50 MB.', 'error');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${apiUrl}/upload`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-            body: formData,
-        });
-
-        if (response.ok) {
-            showMessage('File uploaded successfully!', 'success');
-            fileInput.value = '';
-            loadFiles();
-        } else {
-            showMessage('Failed to upload file.', 'error');
-        }
-    } catch (error) {
-        showMessage('An error occurred while uploading the file.', 'error');
-    }
-}
-
-async function loadFiles() {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${apiUrl}/files`, {
-            headers: { 'Authorization': `Bearer ${authToken}` },
-        });
-
-        if (response.status === 401) {
-            showMessage('Unauthorized. Please log in again.', 'error');
-            window.location.href = '/login.html';
-            return;
-        }
-
-        const files = await response.json();
-        const fileList = document.getElementById('fileList');
-        fileList.innerHTML = '';
-
-        if (files.length === 0) {
-            fileList.innerHTML = '<li class="text-gray-500">No files uploaded.</li>';
-        } else {
-            files.forEach((file) => {
-                const li = document.createElement('li');
-
-                // File link
-                const link = document.createElement('a');
-                link.href = `${apiUrl}/files/${file}`;
-                link.textContent = file;
-                link.target = '_blank';
-                link.className = 'text-blue-600 hover:underline';
-                li.appendChild(link);
-
-                // Delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.className = 'ml-4 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700';
-                deleteButton.addEventListener('click', () => deleteFile(file));
-
-                li.appendChild(deleteButton);
-                fileList.appendChild(li);
-            });
-        }
-    } catch (error) {
-        showMessage('An error occurred while loading files.', 'error');
-    }
-}
-
-async function deleteFile(filename) {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${apiUrl}/files/${filename}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-        });
-
-        if (response.ok) {
-            showMessage('File deleted successfully!', 'success');
-            loadFiles();
-        } else {
-            showMessage('Failed to delete the file.', 'error');
-        }
-    } catch (error) {
-        showMessage('An error occurred while deleting the file.', 'error');
-    }
-}
-
-// Show status message
-function showMessage(message, type) {
-    const statusMessage = document.getElementById('statusMessage');
-    statusMessage.textContent = message;
-    statusMessage.style.display = 'block';
-    statusMessage.style.color = type === 'success' ? 'green' : 'red';
-
-    setTimeout(() => {
-        statusMessage.style.display = 'none';
-    }, 3000);
-}
+// Initialize the app
+checkLoginStatus();
+loadClipboard();
