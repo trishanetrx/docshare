@@ -37,7 +37,7 @@ async function saveToClipboard() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
+                'Authorization': authToken
             },
             body: JSON.stringify({ text }),
         });
@@ -58,7 +58,7 @@ async function loadClipboard() {
     const authToken = localStorage.getItem('authToken');
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: { 'Authorization': authToken }
         });
         const data = await response.json();
 
@@ -84,7 +84,7 @@ async function clearClipboard() {
     try {
         const response = await fetch(`${apiUrl}/clipboard`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: { 'Authorization': authToken }
         });
 
         if (response.ok) {
@@ -123,7 +123,7 @@ async function uploadFile() {
     try {
         const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` },
+            headers: { 'Authorization': authToken },
             body: formData,
         });
 
@@ -143,7 +143,7 @@ async function loadFiles() {
     const authToken = localStorage.getItem('authToken');
     try {
         const response = await fetch(`${apiUrl}/files`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: { 'Authorization': authToken }
         });
         const files = await response.json();
 
@@ -158,7 +158,7 @@ async function loadFiles() {
 
                 // File link
                 const link = document.createElement('a');
-                link.href = `${apiUrl}/files/${file}?token=${authToken}`;
+                link.href = `${apiUrl}/files/${file}`;
                 link.textContent = file;
                 link.target = '_blank';
                 link.style.marginRight = '10px';
@@ -189,7 +189,7 @@ async function deleteFile(filename) {
     try {
         const response = await fetch(`${apiUrl}/files/${filename}`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: { 'Authorization': authToken }
         });
 
         if (response.ok) {
