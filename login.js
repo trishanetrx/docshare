@@ -1,44 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Login page for Online Clipboard">
-    <meta name="keywords" content="login, clipboard, online">
-    <title>Login - Online Clipboard</title>
+const apiUrl = 'https://negombotech.com/api'; // Define the API base URL
 
-    <!-- TailwindCSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-</head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+// Add toggle password visibility functionality
+document.getElementById('togglePassword').addEventListener('click', () => {
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
 
-    <!-- Login Form -->
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-bold text-center mb-4">Login</h2>
-        <form id="loginForm">
-            <!-- Username Input -->
-            <label for="username" class="block text-gray-700">Username</label>
-            <input type="text" id="username" class="w-full p-2 border rounded mb-4" placeholder="Enter your username" required>
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.classList.remove('fa-eye');
+        passwordIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        passwordIcon.classList.remove('fa-eye-slash');
+        passwordIcon.classList.add('fa-eye');
+    }
+});
 
-            <!-- Password Input -->
-            <label for="password" class="block text-gray-700">Password</label>
-            <div class="relative">
-                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
-                <button type="button" id="togglePassword" class="absolute right-2 top-3 text-gray-500">
-                    <i id="passwordIcon" class="fas fa-eye"></i>
-                </button>
-            </div>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent default form submission
 
-            <!-- Submit Button -->
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Login</button>
-        </form>
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
 
-        <!-- Redirect to Registration -->
-        <p class="mt-4 text-center">Don't have an account? <a href="/register.html" class="text-blue-500">Sign up</a></p>
-    </div>
+    try {
+        const response = await fetch(`${apiUrl}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
 
-    <!-- JavaScript -->
-    <script src="login.js"></script>
-</body>
-</html>
+        const data = await response.json();
+
+        if (response.ok) {
+            // Store the auth token in localStorage
+            localStorage.setItem('token', data.token);
+            alert('Login successful! Redirecting to clipboard...');
+            window.location.href = '/clipboard.html'; // Redirect to the clipboard page
+        } else {
+            // Handle login failure
+            alert(data.message || 'Login failed. Please try again.');
+        }
+    } catch (error) {
+        // Handle network or server errors
+        console.error('Login error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
