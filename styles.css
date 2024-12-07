@@ -76,6 +76,9 @@ ul {
 }
 
 li {
+    display: flex; /* Ensure the file name and button are aligned horizontally */
+    justify-content: space-between; /* Add spacing between file name and button */
+    align-items: center; /* Vertically align items */
     background-color: var(--list-item-bg);
     margin: 10px 0;
     padding: 15px;
@@ -86,4 +89,18 @@ li {
 
 li:hover {
     background-color: var(--list-item-hover-bg); /* Change background on hover */
+}
+
+li button {
+    background-color: red; /* Red for delete button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px; /* Adjust padding for a clean look */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+li button:hover {
+    background-color: darkred; /* Darker red on hover */
 }
