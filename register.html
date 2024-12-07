@@ -9,7 +9,6 @@
 
     <!-- TailwindCSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen">
 
@@ -23,12 +22,7 @@
 
             <!-- Password Input -->
             <label for="password" class="block text-gray-700">Password</label>
-            <div class="relative">
-                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
-                <button type="button" id="togglePassword" class="absolute right-2 top-3 text-gray-500">
-                    <i id="passwordIcon" class="fas fa-eye"></i>
-                </button>
-            </div>
+            <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
 
             <!-- Confirm Password Input -->
             <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
@@ -43,21 +37,6 @@
     </div>
 
     <!-- JavaScript -->
-    <script>
-        document.getElementById('togglePassword').addEventListener('click', () => {
-            const passwordInput = document.getElementById('password');
-            const passwordIcon = document.getElementById('passwordIcon');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordIcon.classList.remove('fa-eye');
-                passwordIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordIcon.classList.remove('fa-eye-slash');
-                passwordIcon.classList.add('fa-eye');
-            }
-        });
-    </script>
+    <script src="register.js"></script>
 </body>
 </html>
