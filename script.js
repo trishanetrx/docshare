@@ -171,10 +171,44 @@ async function loadFiles() {
 
                 // File link
                 const link = document.createElement('a');
-                link.href = `${apiUrl}/files/${file}`;
                 link.textContent = file;
-                link.target = '_blank';
+                link.style.cursor = 'pointer';
                 link.style.marginRight = '10px';
+
+                // Add click listener to handle download with authorization
+                link.addEventListener('click', async () => {
+                    const authToken = localStorage.getItem('token');
+                    try {
+                        const response = await fetch(`${apiUrl}/files/${file}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+
+                        if (!response.ok) {
+                            showMessage('Failed to download the file.', 'error');
+                            return;
+                        }
+
+                        // Create a blob URL for the file
+                        const blob = await response.blob();
+                        const downloadUrl = URL.createObjectURL(blob);
+
+                        // Create a temporary link to trigger the download
+                        const tempLink = document.createElement('a');
+                        tempLink.href = downloadUrl;
+                        tempLink.download = file; // Set file name for download
+                        tempLink.click();
+
+                        // Revoke the object URL after download
+                        URL.revokeObjectURL(downloadUrl);
+                    } catch (error) {
+                        console.error('Error downloading file:', error);
+                        showMessage('Error downloading the file.', 'error');
+                    }
+                });
+
                 li.appendChild(link);
 
                 // Delete button
