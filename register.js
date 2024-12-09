@@ -28,12 +28,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const confirmPassword = document.getElementById('confirmPassword').value;
 
     if (!username || !password || !confirmPassword) {
-        alert('All fields are required.');
+        showNotification('All fields are required.', 'error');
         return;
     }
 
     if (password !== confirmPassword) {
-        alert('Passwords do not match.');
+        showNotification('Passwords do not match.', 'error');
         return;
     }
 
@@ -47,13 +47,33 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         const data = await response.json();
 
         if (response.ok) {
-            alert('Registration successful! Redirecting...');
-            window.location.href = '/login.html';
+            showNotification('Registration successful! Redirecting...', 'success');
+
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 2000);
         } else {
-            alert(data.message || 'Registration failed.');
+            showNotification(data.message || 'Registration failed.', 'error');
         }
     } catch (error) {
         console.error('Registration error:', error);
-        alert('An error occurred. Please try again.');
+        showNotification('An error occurred. Please try again.', 'error');
     }
 });
+
+// Function to display notifications
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+
+    document.body.appendChild(notification);
+
+    // Automatically remove the notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
