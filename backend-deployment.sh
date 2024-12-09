@@ -15,6 +15,8 @@ npm init -y
 npm install express cors
 npm install multer
 npm install -g pm2
+npm install
+npm install express cors multer bcryptjs jsonwebtoken body-parser
 
 # Create the server.js file
 cat <<EOL > ~/clipboard-backend/server.js
