@@ -219,7 +219,6 @@ pm2 stop clipboard-backend || true
 pm2 delete clipboard-backend || true
 pm2 start ~/clipboard-backend/server.js --name clipboard-backend
 
-# Configure NGINX to proxy requests to the backend
 echo "Configuring NGINX..."
 NGINX_CONF="/etc/nginx/sites-available/clipboard-backend"
 if [ -f "$NGINX_CONF" ]; then
@@ -227,7 +226,8 @@ if [ -f "$NGINX_CONF" ]; then
     sudo rm "$NGINX_CONF"
 fi
 
-cat <<EOL | sudo tee "$NGINX_CONF"
+#Create the nginx Configuration
+cat <<'EOL' | sudo tee "$NGINX_CONF"
 server {
     listen 80;
     server_name negombotech.com www.negombotech.com;
