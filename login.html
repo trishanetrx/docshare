@@ -10,32 +10,63 @@
     <!-- TailwindCSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #1e3a8a; /* Deep blue background */
+        }
+        .background-image {
+            background: url('./images/background.png') no-repeat center center;
+            background-size: cover;
+        }
+        .login-container {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body class="h-screen flex">
+    <!-- Left Side: Background -->
+    <div class="background-image w-1/2 h-full hidden lg:block"></div>
 
-    <!-- Login Form -->
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-bold text-center mb-4">Login</h2>
-        <form id="loginForm">
-            <!-- Username Input -->
-            <label for="username" class="block text-gray-700">Username</label>
-            <input type="text" id="username" name="username" class="w-full p-2 border rounded mb-4" placeholder="Enter your username" required>
+    <!-- Right Side: Login Form -->
+    <div class="flex flex-col justify-center items-center w-full lg:w-1/2 p-6">
+        <div class="login-container p-8 rounded-lg shadow-md w-full max-w-md">
+            <h1 class="text-3xl font-bold text-blue-600 text-center mb-4">HELLO!</h1>
+            <p class="text-gray-600 text-center mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <form id="loginForm">
+                <!-- Username Input -->
+                <label for="username" class="block text-gray-700 mb-2">Username</label>
+                <input type="text" id="username" name="username" class="w-full p-3 mb-4 border rounded" placeholder="Enter your username" required>
 
-            <!-- Password Input -->
-            <label for="password" class="block text-gray-700">Password</label>
-            <div class="relative">
-                <input type="password" id="password" name="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
-                <button type="button" id="togglePassword" class="absolute right-2 top-3 text-gray-500">
-                    <i id="passwordIcon" class="fas fa-eye"></i>
+                <!-- Password Input -->
+                <label for="password" class="block text-gray-700 mb-2">Password</label>
+                <div class="relative">
+                    <input type="password" id="password" name="password" class="w-full p-3 border rounded mb-4" placeholder="Enter your password" required>
+                    <button type="button" id="togglePassword" class="absolute right-3 top-3 text-gray-500">
+                        <i id="passwordIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <!-- Remember Me and Forgot Password -->
+                <div class="flex items-center justify-between mb-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2">
+                        Remember
+                    </label>
+                    <a href="#" class="text-blue-500 text-sm">Forgot your password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded w-full">
+                    NEXT →
                 </button>
-            </div>
+            </form>
 
-            <!-- Submit Button -->
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Login</button>
-        </form>
-
-        <!-- Redirect to Registration -->
-        <p class="mt-4 text-center">Don't have an account? <a href="register.html" class="text-blue-500">Sign up</a></p>
+            <!-- Redirect to Registration -->
+            <p class="text-center mt-4">
+                <a href="register.html" class="text-blue-500">Create account</a>
+            </p>
+        </div>
     </div>
 
     <!-- JavaScript -->
