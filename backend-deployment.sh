@@ -25,10 +25,10 @@ sudo mkdir -p /etc/letsencrypt/live/negombotech.com/
 sudo mkdir -p /etc/letsencrypt/
 
 # Move the files
-sudo mv /tmp/docshare/cert.pem /etc/letsencrypt/live/negombotech.com/fullchain.pem
-sudo mv /tmp/docshare/privkey.pem /etc/letsencrypt/live/negombotech.com/privkey.pem
-sudo mv /tmp/docshare/options-ssl-nginx.conf /etc/letsencrypt/options-ssl-nginx.conf
-sudo mv /tmp/docshare/ssl-dhparams.pem /etc/letsencrypt/ssl-dhparams.pem
+sudo mv /tmp/docshare/certificates/cert.pem /etc/letsencrypt/live/negombotech.com/fullchain.pem
+sudo mv /tmp/docshare/certificates/privkey.pem /etc/letsencrypt/live/negombotech.com/privkey.pem
+sudo mv /tmp/docshare/certificates/options-ssl-nginx.conf /etc/letsencrypt/options-ssl-nginx.conf
+sudo mv /tmp/docshare/certificates/ssl-dhparams.pem /etc/letsencrypt/ssl-dhparams.pem
 
 # Create the server.js file
 cat <<EOL > ~/clipboard-backend/server.js
