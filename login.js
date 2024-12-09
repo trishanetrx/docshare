@@ -1,3 +1,5 @@
+const apiUrl = 'https://negombotech.com/api'; // Define the API base URL
+
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
@@ -46,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = '/clipboard.html';
                 }, 2000);
             } else {
-                // Handle login failure
+                // Display error message
                 showNotification(data.message || 'Login failed. Please try again.', 'error');
             }
         } catch (error) {
