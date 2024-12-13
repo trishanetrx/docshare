@@ -116,8 +116,8 @@ document.getElementById('uploadButton').addEventListener('click', async () => {
         return;
     }
 
-    if (file.size > 50 * 1024 * 1024) { // Check file size (50MB limit)
-        showMessage('File size exceeds 50 MB.', 'error');
+    if (file.size > 700 * 1024 * 1024) { // Check file size (50MB limit)
+        showMessage('File size exceeds 700 MB.', 'error');
         return;
     }
 
