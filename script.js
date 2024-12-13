@@ -35,17 +35,14 @@ async function loadClipboard() {
         });
         const data = await response.json();
 
-        const clipboardList = document.getElementById('clipboardList');
-        clipboardList.innerHTML = '';
+        const clipboardCode = document.getElementById('clipboardCode');
+        clipboardCode.innerHTML = '';
 
         if (data.length === 0) {
-            clipboardList.innerHTML = '<li class="text-gray-500">No clipboard data available.</li>';
+            clipboardCode.textContent = 'No clipboard data available.';
         } else {
-            data.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                clipboardList.appendChild(li);
-            });
+            clipboardCode.textContent = data[0]; // Assuming the latest entry
+            Prism.highlightElement(clipboardCode); // Apply syntax highlighting
         }
     } catch (error) {
         console.error('Error loading clipboard data:', error);
@@ -75,6 +72,11 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
         if (response.ok) {
             showMessage('Text saved successfully!', 'success');
             document.getElementById('clipboardInput').value = '';
+
+            // Display saved text with syntax highlighting
+            const clipboardCode = document.getElementById('clipboardCode');
+            clipboardCode.textContent = text;
+            Prism.highlightElement(clipboardCode); // Apply highlighting
             await loadClipboard();
         } else {
             showMessage('Failed to save text.', 'error');
@@ -116,7 +118,7 @@ document.getElementById('uploadButton').addEventListener('click', async () => {
         return;
     }
 
-    if (file.size > 700 * 1024 * 1024) { // Check file size (50MB limit)
+    if (file.size > 700 * 1024 * 1024) { // Check file size (700MB limit)
         showMessage('File size exceeds 700 MB.', 'error');
         return;
     }
