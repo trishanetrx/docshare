@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
 </head>
 <body class="bg-gray-100 font-roboto">
     <!-- Header Section -->
@@ -30,13 +33,10 @@
             <h2 class="text-xl font-semibold mb-4">Clipboard</h2>
             <textarea id="clipboardInput" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Type or paste your text here..."></textarea>
             <div class="flex justify-start space-x-4">
-                <button id="saveClipboard" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Save
-                </button>
-                <button id="clearClipboard" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
-                    Clear
-                </button>
+                <button id="saveClipboard" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+                <button id="clearClipboard" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Clear</button>
             </div>
+            <pre class="language-nginx"><code id="clipboardCode"></code></pre>
         </section>
 
         <!-- Saved Clipboard Data -->
