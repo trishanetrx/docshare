@@ -1,14 +1,5 @@
 const apiUrl = 'https://negombotech.com/api'; // Define the API base URL
 
-// Check if the user is logged in
-function checkLoginStatus() {
-    const authToken = localStorage.getItem('token');
-    if (!authToken) {
-        alert('You are not logged in. Redirecting...');
-        window.location.href = '/login.html';
-    }
-}
-
 // Display status messages
 function showMessage(message, type) {
     const statusMessage = document.getElementById('statusMessage');
@@ -24,30 +15,6 @@ function showMessage(message, type) {
     setTimeout(() => {
         statusMessage.classList.add('hidden');
     }, 3000);
-}
-
-// Load clipboard data
-async function loadClipboard() {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${apiUrl}/clipboard`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-
-        const clipboardCode = document.getElementById('clipboardCode');
-        clipboardCode.innerHTML = '';
-
-        if (data.length === 0) {
-            clipboardCode.textContent = 'No clipboard data available.';
-        } else {
-            clipboardCode.textContent = data[0]; // Assuming the latest entry
-            Prism.highlightElement(clipboardCode); // Apply syntax highlighting
-        }
-    } catch (error) {
-        console.error('Error loading clipboard data:', error);
-        showMessage('Error loading clipboard data.', 'error');
-    }
 }
 
 // Save clipboard data
@@ -73,11 +40,19 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
             showMessage('Text saved successfully!', 'success');
             document.getElementById('clipboardInput').value = '';
 
-            // Display saved text with syntax highlighting
-            const clipboardCode = document.getElementById('clipboardCode');
-            clipboardCode.textContent = text;
-            Prism.highlightElement(clipboardCode); // Apply highlighting
-            await loadClipboard();
+            // Create a new <pre><code> block for the new entry
+            const clipboardList = document.getElementById('clipboardList');
+            const newBlock = document.createElement('pre');
+            const newCode = document.createElement('code');
+
+            newBlock.classList.add('language-nginx');
+            newCode.classList.add('language-nginx');
+            newCode.textContent = text; // Set the new text
+
+            newBlock.appendChild(newCode);
+            clipboardList.appendChild(newBlock); // Add the block to the list
+
+            Prism.highlightElement(newCode); // Apply syntax highlighting
         } else {
             showMessage('Failed to save text.', 'error');
         }
@@ -98,7 +73,8 @@ document.getElementById('clearClipboard').addEventListener('click', async () => 
 
         if (response.ok) {
             showMessage('Clipboard cleared!', 'success');
-            await loadClipboard();
+            const clipboardList = document.getElementById('clipboardList');
+            clipboardList.innerHTML = ''; // Clear all blocks
         } else {
             showMessage('Failed to clear clipboard.', 'error');
         }
@@ -108,163 +84,43 @@ document.getElementById('clearClipboard').addEventListener('click', async () => 
     }
 });
 
-// File upload functionality
-document.getElementById('uploadButton').addEventListener('click', async () => {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-
-    if (!file) {
-        showMessage('Please select a file to upload.', 'error');
-        return;
-    }
-
-    if (file.size > 700 * 1024 * 1024) { // Check file size (700MB limit)
-        showMessage('File size exceeds 700 MB.', 'error');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const authToken = localStorage.getItem('token');
-
-    try {
-        const response = await fetch(`${apiUrl}/upload`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-            },
-            body: formData,
-        });
-
-        if (response.ok) {
-            showMessage('File uploaded successfully!', 'success');
-            fileInput.value = ''; // Clear the file input
-            await loadFiles(); // Refresh the file list
-        } else {
-            const errorData = await response.json();
-            showMessage(errorData.message || 'Failed to upload file.', 'error');
-        }
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        showMessage('An error occurred while uploading the file.', 'error');
-    }
-});
-
-// Load files dynamically
-async function loadFiles() {
+// Load clipboard data
+async function loadClipboard() {
     const authToken = localStorage.getItem('token');
     try {
-        const response = await fetch(`${apiUrl}/files`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-            },
+        const response = await fetch(`${apiUrl}/clipboard`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
-        const files = await response.json();
+        const data = await response.json();
 
-        const fileList = document.getElementById('fileList');
-        fileList.innerHTML = '';
+        const clipboardList = document.getElementById('clipboardList');
+        clipboardList.innerHTML = ''; // Clear existing blocks
 
-        if (files.length === 0) {
-            fileList.innerHTML = '<li class="text-gray-500">No files uploaded.</li>';
+        if (data.length === 0) {
+            const noDataMessage = document.createElement('li');
+            noDataMessage.textContent = 'No clipboard data available.';
+            noDataMessage.classList.add('text-gray-500');
+            clipboardList.appendChild(noDataMessage);
         } else {
-            files.forEach((file) => {
-                const li = document.createElement('li');
+            data.forEach((item) => {
+                const newBlock = document.createElement('pre');
+                const newCode = document.createElement('code');
 
-                // File link
-                const link = document.createElement('a');
-                link.textContent = file;
-                link.style.cursor = 'pointer';
-                link.style.marginRight = '10px';
+                newBlock.classList.add('language-nginx');
+                newCode.classList.add('language-nginx');
+                newCode.textContent = item;
 
-                // Add click listener to handle download with authorization
-                link.addEventListener('click', async () => {
-                    const authToken = localStorage.getItem('token');
-                    try {
-                        const response = await fetch(`${apiUrl}/files/${file}`, {
-                            method: 'GET',
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`
-                            }
-                        });
+                newBlock.appendChild(newCode);
+                clipboardList.appendChild(newBlock);
 
-                        if (!response.ok) {
-                            showMessage('Failed to download the file.', 'error');
-                            return;
-                        }
-
-                        // Create a blob URL for the file
-                        const blob = await response.blob();
-                        const downloadUrl = URL.createObjectURL(blob);
-
-                        // Create a temporary link to trigger the download
-                        const tempLink = document.createElement('a');
-                        tempLink.href = downloadUrl;
-                        tempLink.download = file; // Set file name for download
-                        tempLink.click();
-
-                        // Revoke the object URL after download
-                        URL.revokeObjectURL(downloadUrl);
-                    } catch (error) {
-                        console.error('Error downloading file:', error);
-                        showMessage('Error downloading the file.', 'error');
-                    }
-                });
-
-                li.appendChild(link);
-
-                // Delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.style.color = 'white';
-                deleteButton.style.backgroundColor = 'red';
-                deleteButton.style.border = 'none';
-                deleteButton.style.padding = '5px 10px';
-                deleteButton.style.borderRadius = '5px';
-                deleteButton.style.cursor = 'pointer';
-                deleteButton.addEventListener('click', () => deleteFile(file));
-
-                li.appendChild(deleteButton);
-                fileList.appendChild(li);
+                Prism.highlightElement(newCode); // Apply syntax highlighting
             });
         }
     } catch (error) {
-        console.error('Error loading files:', error);
-        showMessage('An error occurred while loading files.', 'error');
+        console.error('Error loading clipboard data:', error);
+        showMessage('Error loading clipboard data.', 'error');
     }
 }
-
-// Delete a file
-async function deleteFile(filename) {
-    const authToken = localStorage.getItem('token');
-    try {
-        const response = await fetch(`${apiUrl}/files/${filename}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-        });
-
-        if (response.ok) {
-            showMessage('File deleted successfully!', 'success');
-            await loadFiles(); // Refresh file list
-        } else {
-            showMessage('Failed to delete the file.', 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting file:', error);
-        showMessage('An error occurred while deleting the file.', 'error');
-    }
-}
-
-// Logout functionality
-document.getElementById('logoutButton').addEventListener('click', () => {
-    localStorage.removeItem('token'); // Remove the auth token
-    showMessage('Logged out successfully!', 'success');
-    setTimeout(() => {
-        window.location.href = '/login.html'; // Redirect to the login page
-    }, 1000);
-});
 
 // Initialize the app
-checkLoginStatus();
 loadClipboard();
-loadFiles();
