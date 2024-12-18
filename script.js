@@ -17,6 +17,21 @@ function showMessage(message, type) {
     }, 3000);
 }
 
+// Logout functionality
+document.getElementById("logoutButton").addEventListener("click", () => {
+    // Clear any stored tokens or session data
+    localStorage.removeItem('token'); // Assuming the token is stored in localStorage
+    sessionStorage.clear();
+
+    // Display logout message
+    showMessage('You have been logged out.', 'success');
+
+    // Optionally redirect to a login page or home page after a short delay
+    setTimeout(() => {
+        window.location.href = "/login.html"; // Adjust the URL as needed
+    }, 2000);
+});
+
 // Save clipboard data
 document.getElementById('saveClipboard').addEventListener('click', async () => {
     const text = document.getElementById('clipboardInput').value;
