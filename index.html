@@ -7,7 +7,7 @@
     <meta name="keywords" content="clipboard, online, text, save, load">
     <title>Online Clipboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         /* Header customization */
@@ -16,6 +16,27 @@
             background-size: cover;
             background-position: center;
         }
+
+        /* Heading styles */
+        .heading {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+            color: white;
+        }
+        .heading::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0.1rem;
+            width: 100%;
+            height: 0.3rem;
+            background-color: orange;
+            z-index: -1;
+        }
+
         /* Button glow effect */
         button {
             transition: transform 0.2s, box-shadow 0.2s;
@@ -43,16 +64,29 @@
         #clipboardButton:hover {
             background-color: #0288d1;
         }
+
+        /* Footer styles */
+        footer {
+            font-size: 0.85rem;
+            font-weight: 300;
+            text-align: center;
+            padding: 0.5rem;
+            background-color: #222;
+            color: #aaa;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-roboto">
     <!-- Header Section -->
     <header class="text-white p-4">
-        <h1 class="text-2xl font-bold text-center">VentiqoTech - Online Clipboard</h1>
+        <h1 class="heading text-center mx-auto">Clipboard</h1>
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto p-4">
+    <main class="container mx-auto p-4" style="min-height: calc(100vh - 5rem);">
         <!-- Buttons -->
         <div class="flex justify-center space-x-4 mt-8">
             <button id="loginButton" class="text-white px-6 py-3 rounded">
@@ -68,8 +102,8 @@
     </main>
 
     <!-- Footer Section -->
-    <footer class="bg-gray-800 text-white text-center p-4 mt-4">
-        <p>&copy; 2024 VentiqoTech. All rights reserved.</p>
+    <footer>
+        &copy; 2024 VentiqoTech. All rights reserved.
     </footer>
 
     <!-- JavaScript -->
