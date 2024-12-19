@@ -28,7 +28,7 @@ document.getElementById("logoutButton").addEventListener("click", () => {
 
     // Optionally redirect to a login page or home page after a short delay
     setTimeout(() => {
-        window.location.href = "/login.html"; // Adjust the URL as needed
+        window.location.href = "/index.html"; // Adjust the URL as needed
     }, 2000);
 });
 
