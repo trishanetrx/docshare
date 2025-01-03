@@ -9,82 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        /* Header customization */
-        header {
-            background-image: url('/clipboardblueline.png');
-            background-size: cover;
-            background-position: center;
-            position: relative; /* Added for positioning the heading */
-        }
-
-        /* Heading styles */
-        .heading {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: bold;
-            position: absolute; /* Absolute positioning */
-            top: 0; /* Align to the top */
-            right: 1rem; /* Align to the right */
-            margin: 0; /* Remove default margin */
-            color: white;
-        }
-        .heading::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0.1rem;
-            width: 100%;
-            height: 0.3rem;
-            background-color: orange;
-            z-index: -1;
-        }
-
-        /* Button glow effect */
-        button {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
-        /* Button colors matching image tones */
-        #loginButton {
-            background-color: #ff5722; /* Adjust to match image */
-        }
-        #loginButton:hover {
-            background-color: #e64a19;
-        }
-        #registerButton {
-            background-color: #8bc34a; /* Adjust to match image */
-        }
-        #registerButton:hover {
-            background-color: #7cb342;
-        }
-        #clipboardButton {
-            background-color: #03a9f4; /* Adjust to match image */
-        }
-        #clipboardButton:hover {
-            background-color: #0288d1;
-        }
-
-        /* Footer styles */
-        footer {
-            font-size: 0.85rem;
-            font-weight: 300;
-            text-align: center;
-            padding: 0.5rem;
-            background-color: #222;
-            color: #aaa;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-100 font-roboto">
     <!-- Header Section -->
-    <header class="text-white p-4">
+    <header class="text-white p-4 flex justify-end items-center">
         <h1 class="heading">Clipboard</h1>
     </header>
 
