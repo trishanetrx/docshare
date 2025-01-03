@@ -15,6 +15,7 @@
             background-image: url('/clipboardblueline.png');
             background-size: cover;
             background-position: center;
+            position: relative; /* Added for positioning the heading */
         }
 
         /* Heading styles */
@@ -22,8 +23,10 @@
             font-family: 'Orbitron', sans-serif;
             font-size: 2.5rem;
             font-weight: bold;
-            position: relative;
-            display: inline-block;
+            position: absolute; /* Absolute positioning */
+            top: 0; /* Align to the top */
+            right: 1rem; /* Align to the right */
+            margin: 0; /* Remove default margin */
             color: white;
         }
         .heading::before {
@@ -82,7 +85,7 @@
 <body class="bg-gray-100 font-roboto">
     <!-- Header Section -->
     <header class="text-white p-4">
-        <h1 class="heading text-center mx-auto">Clipboard</h1>
+        <h1 class="heading">Clipboard</h1>
     </header>
 
     <!-- Main Content -->
