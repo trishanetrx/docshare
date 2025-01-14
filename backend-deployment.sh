@@ -81,7 +81,7 @@ const storage = multer.diskStorage({
         cb(null, filename);
     }
 });
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } }); // 50 MB limit
+const upload = multer({ storage, limits: { fileSize: 700 * 1024 * 1024 } }); // 700 MB limit
 
 // Routes
 
@@ -248,7 +248,7 @@ server {
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
-    client_max_body_size 70M;
+    client_max_body_size 700M;
 
     # Proxy API requests to the backend
     location /api/ {
