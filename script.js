@@ -19,20 +19,15 @@ function showMessage(message, type) {
 
 // Logout functionality
 document.getElementById("logoutButton").addEventListener("click", () => {
-    // Clear any stored tokens or session data
-    localStorage.removeItem('token'); // Assuming the token is stored in localStorage
+    localStorage.removeItem('token');
     sessionStorage.clear();
-
-    // Display logout message
     showMessage('You have been logged out.', 'success');
-
-    // Optionally redirect to a login page or home page after a short delay
     setTimeout(() => {
-        window.location.href = "/index.html"; // Adjust the URL as needed
+        window.location.href = "/index.html";
     }, 2000);
 });
 
-// Save clipboard data
+// Save clipboard data (unchanged)
 document.getElementById('saveClipboard').addEventListener('click', async () => {
     const text = document.getElementById('clipboardInput').value;
     if (!text) {
@@ -54,20 +49,15 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
         if (response.ok) {
             showMessage('Text saved successfully!', 'success');
             document.getElementById('clipboardInput').value = '';
-
-            // Create a new <pre><code> block for the new entry
             const clipboardList = document.getElementById('clipboardList');
             const newBlock = document.createElement('pre');
             const newCode = document.createElement('code');
-
             newBlock.classList.add('language-nginx');
             newCode.classList.add('language-nginx');
-            newCode.textContent = text; // Set the new text
-
+            newCode.textContent = text;
             newBlock.appendChild(newCode);
-            clipboardList.appendChild(newBlock); // Add the block to the list
-
-            Prism.highlightElement(newCode); // Apply syntax highlighting
+            clipboardList.appendChild(newBlock);
+            Prism.highlightElement(newCode);
         } else {
             showMessage('Failed to save text.', 'error');
         }
@@ -77,7 +67,7 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
     }
 });
 
-// Clear clipboard data
+// Clear clipboard data (unchanged)
 document.getElementById('clearClipboard').addEventListener('click', async () => {
     const authToken = localStorage.getItem('token');
     try {
@@ -89,7 +79,7 @@ document.getElementById('clearClipboard').addEventListener('click', async () => 
         if (response.ok) {
             showMessage('Clipboard cleared!', 'success');
             const clipboardList = document.getElementById('clipboardList');
-            clipboardList.innerHTML = ''; // Clear all blocks
+            clipboardList.innerHTML = '';
         } else {
             showMessage('Failed to clear clipboard.', 'error');
         }
@@ -99,7 +89,7 @@ document.getElementById('clearClipboard').addEventListener('click', async () => 
     }
 });
 
-// Load clipboard data
+// Load clipboard data (unchanged)
 async function loadClipboard() {
     const authToken = localStorage.getItem('token');
     try {
@@ -107,9 +97,8 @@ async function loadClipboard() {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const data = await response.json();
-
         const clipboardList = document.getElementById('clipboardList');
-        clipboardList.innerHTML = ''; // Clear existing blocks
+        clipboardList.innerHTML = '';
 
         if (data.length === 0) {
             const noDataMessage = document.createElement('li');
@@ -120,15 +109,12 @@ async function loadClipboard() {
             data.forEach((item) => {
                 const newBlock = document.createElement('pre');
                 const newCode = document.createElement('code');
-
                 newBlock.classList.add('language-nginx');
                 newCode.classList.add('language-nginx');
                 newCode.textContent = item;
-
                 newBlock.appendChild(newCode);
                 clipboardList.appendChild(newBlock);
-
-                Prism.highlightElement(newCode); // Apply syntax highlighting
+                Prism.highlightElement(newCode);
             });
         }
     } catch (error) {
@@ -137,17 +123,18 @@ async function loadClipboard() {
     }
 }
 
-// File upload functionality
-document.getElementById('uploadButton').addEventListener('click', async () => {
+// 🚀 File upload with progress bar
+document.getElementById('uploadButton').addEventListener('click', () => {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
+    const progressBar = document.getElementById('uploadProgress');
 
     if (!file) {
         showMessage('Please select a file to upload.', 'error');
         return;
     }
 
-    if (file.size > 700 * 1024 * 1024) { // Check file size (700MB limit)
+    if (file.size > 700 * 1024 * 1024) {
         showMessage('File size exceeds 700 MB.', 'error');
         return;
     }
@@ -156,41 +143,51 @@ document.getElementById('uploadButton').addEventListener('click', async () => {
     formData.append('file', file);
 
     const authToken = localStorage.getItem('token');
+    const xhr = new XMLHttpRequest();
 
-    try {
-        const response = await fetch(`${apiUrl}/upload`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-            },
-            body: formData,
-        });
+    xhr.open('POST', `${apiUrl}/upload`, true);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
-        if (response.ok) {
-            showMessage('File uploaded successfully!', 'success');
-            fileInput.value = ''; // Clear the file input
-            await loadFiles(); // Refresh the file list
-        } else {
-            const errorData = await response.json();
-            showMessage(errorData.message || 'Failed to upload file.', 'error');
+    progressBar.classList.remove('hidden');
+    progressBar.value = 0;
+
+    xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+            const percent = (event.loaded / event.total) * 100;
+            progressBar.value = percent;
         }
-    } catch (error) {
-        console.error('Error uploading file:', error);
+    };
+
+    xhr.onload = async function () {
+        if (xhr.status === 200) {
+            showMessage('File uploaded successfully!', 'success');
+            fileInput.value = '';
+            progressBar.classList.add('hidden');
+            progressBar.value = 0;
+            await loadFiles();
+        } else {
+            const error = JSON.parse(xhr.responseText);
+            showMessage(error.message || 'Failed to upload file.', 'error');
+            progressBar.classList.add('hidden');
+        }
+    };
+
+    xhr.onerror = function () {
         showMessage('An error occurred while uploading the file.', 'error');
-    }
+        progressBar.classList.add('hidden');
+    };
+
+    xhr.send(formData);
 });
 
-// Load files dynamically
+// Load files (unchanged)
 async function loadFiles() {
     const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/files`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-            },
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const files = await response.json();
-
         const fileList = document.getElementById('fileList');
         fileList.innerHTML = '';
 
@@ -199,22 +196,17 @@ async function loadFiles() {
         } else {
             files.forEach((file) => {
                 const li = document.createElement('li');
-
-                // File link
                 const link = document.createElement('a');
                 link.textContent = file;
                 link.style.cursor = 'pointer';
                 link.style.marginRight = '10px';
 
-                // Add click listener to handle download with authorization
                 link.addEventListener('click', async () => {
                     const authToken = localStorage.getItem('token');
                     try {
                         const response = await fetch(`${apiUrl}/files/${file}`, {
                             method: 'GET',
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`
-                            }
+                            headers: { 'Authorization': `Bearer ${authToken}` }
                         });
 
                         if (!response.ok) {
@@ -222,17 +214,12 @@ async function loadFiles() {
                             return;
                         }
 
-                        // Create a blob URL for the file
                         const blob = await response.blob();
                         const downloadUrl = URL.createObjectURL(blob);
-
-                        // Create a temporary link to trigger the download
                         const tempLink = document.createElement('a');
                         tempLink.href = downloadUrl;
-                        tempLink.download = file; // Set file name for download
+                        tempLink.download = file;
                         tempLink.click();
-
-                        // Revoke the object URL after download
                         URL.revokeObjectURL(downloadUrl);
                     } catch (error) {
                         console.error('Error downloading file:', error);
@@ -242,7 +229,6 @@ async function loadFiles() {
 
                 li.appendChild(link);
 
-                // Delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
                 deleteButton.style.color = 'white';
@@ -263,18 +249,18 @@ async function loadFiles() {
     }
 }
 
-// Delete a file
+// Delete a file (unchanged)
 async function deleteFile(filename) {
     const authToken = localStorage.getItem('token');
     try {
         const response = await fetch(`${apiUrl}/files/${filename}`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` },
+            headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
         if (response.ok) {
             showMessage('File deleted successfully!', 'success');
-            await loadFiles(); // Refresh file list
+            await loadFiles();
         } else {
             showMessage('Failed to delete the file.', 'error');
         }
@@ -284,6 +270,6 @@ async function deleteFile(filename) {
     }
 }
 
-// Initialize the app
+// Init
 loadClipboard();
 loadFiles();
