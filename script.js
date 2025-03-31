@@ -138,17 +138,16 @@ async function loadClipboard() {
 }
 
 // File upload functionality
-document.getElementById('uploadButton').addEventListener('click', () => {
+document.getElementById('uploadButton').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
-    const progressBar = document.getElementById('uploadProgress');
 
     if (!file) {
         showMessage('Please select a file to upload.', 'error');
         return;
     }
 
-    if (file.size > 700 * 1024 * 1024) {
+    if (file.size > 700 * 1024 * 1024) { // Check file size (700MB limit)
         showMessage('File size exceeds 700 MB.', 'error');
         return;
     }
@@ -157,46 +156,29 @@ document.getElementById('uploadButton').addEventListener('click', () => {
     formData.append('file', file);
 
     const authToken = localStorage.getItem('token');
-    const xhr = new XMLHttpRequest();
 
-    xhr.open('POST', `${apiUrl}/upload`, true);
-    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    try {
+        const response = await fetch(`${apiUrl}/upload`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: formData,
+        });
 
-    // Show progress bar
-    progressBar.classList.remove('hidden');
-    progressBar.value = 0;
-
-    // Progress event
-    xhr.upload.onprogress = function (event) {
-        if (event.lengthComputable) {
-            const percent = (event.loaded / event.total) * 100;
-            progressBar.value = percent;
-        }
-    };
-
-    // On complete
-    xhr.onload = async function () {
-        if (xhr.status === 200) {
+        if (response.ok) {
             showMessage('File uploaded successfully!', 'success');
-            fileInput.value = '';
-            progressBar.classList.add('hidden');
-            progressBar.value = 0;
-            await loadFiles();
+            fileInput.value = ''; // Clear the file input
+            await loadFiles(); // Refresh the file list
         } else {
-            const error = JSON.parse(xhr.responseText);
-            showMessage(error.message || 'Failed to upload file.', 'error');
-            progressBar.classList.add('hidden');
+            const errorData = await response.json();
+            showMessage(errorData.message || 'Failed to upload file.', 'error');
         }
-    };
-
-    // On error
-    xhr.onerror = function () {
+    } catch (error) {
+        console.error('Error uploading file:', error);
         showMessage('An error occurred while uploading the file.', 'error');
-        progressBar.classList.add('hidden');
-    };
-
-    xhr.send(formData);
-}););
+    }
+});
 
 // Load files dynamically
 async function loadFiles() {
