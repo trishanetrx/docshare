@@ -1,5 +1,9 @@
 const apiUrl = 'https://negombotech.com/api'; // Define the API base URL
 
+// 🌐 Get Room ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const room = urlParams.get('room') || 'default';
+
 // Display status messages
 function showMessage(message, type) {
     const statusMessage = document.getElementById('statusMessage');
@@ -27,7 +31,7 @@ document.getElementById("logoutButton").addEventListener("click", () => {
     }, 2000);
 });
 
-// Save clipboard data (unchanged)
+// Save clipboard data (with room)
 document.getElementById('saveClipboard').addEventListener('click', async () => {
     const text = document.getElementById('clipboardInput').value;
     if (!text) {
@@ -43,7 +47,7 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ text })
+            body: JSON.stringify({ text, room })
         });
 
         if (response.ok) {
@@ -67,11 +71,11 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
     }
 });
 
-// Clear clipboard data (unchanged)
+// Clear clipboard data (with room)
 document.getElementById('clearClipboard').addEventListener('click', async () => {
     const authToken = localStorage.getItem('token');
     try {
-        const response = await fetch(`${apiUrl}/clipboard`, {
+        const response = await fetch(`${apiUrl}/clipboard?room=${room}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
@@ -89,11 +93,11 @@ document.getElementById('clearClipboard').addEventListener('click', async () => 
     }
 });
 
-// Load clipboard data (unchanged)
+// Load clipboard data (with room)
 async function loadClipboard() {
     const authToken = localStorage.getItem('token');
     try {
-        const response = await fetch(`${apiUrl}/clipboard`, {
+        const response = await fetch(`${apiUrl}/clipboard?room=${room}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const data = await response.json();
@@ -111,7 +115,7 @@ async function loadClipboard() {
                 const newCode = document.createElement('code');
                 newBlock.classList.add('language-nginx');
                 newCode.classList.add('language-nginx');
-                newCode.textContent = item;
+                newCode.textContent = item.text || item;
                 newBlock.appendChild(newCode);
                 clipboardList.appendChild(newBlock);
                 Prism.highlightElement(newCode);
@@ -123,7 +127,7 @@ async function loadClipboard() {
     }
 }
 
-// 🚀 File upload with progress bar
+// File upload with progress bar
 document.getElementById('uploadButton').addEventListener('click', () => {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
@@ -180,7 +184,7 @@ document.getElementById('uploadButton').addEventListener('click', () => {
     xhr.send(formData);
 });
 
-// Load files (unchanged)
+// Load files
 async function loadFiles() {
     const authToken = localStorage.getItem('token');
     try {
@@ -249,7 +253,7 @@ async function loadFiles() {
     }
 }
 
-// Delete a file (unchanged)
+// Delete a file
 async function deleteFile(filename) {
     const authToken = localStorage.getItem('token');
     try {
