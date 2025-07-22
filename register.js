@@ -1,4 +1,4 @@
-const apiUrl = 'https://negombotech.com/api';
+const apiUrl = 'https://copythingz.shop/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
