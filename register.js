@@ -1,5 +1,5 @@
 // register.js
-const apiUrl = 'https://copythingz.shop/api';
+const apiUrl = 'https://api.copythingz.shop';
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
