@@ -1,5 +1,5 @@
 // script.js
-const apiUrl = 'https://copythingz.shop/api'; // Define the API base URL
+const apiUrl = 'https://api.copythingz.shop'; // Define the API base URL
 
 // Display status messages
 function showMessage(message, type) {
