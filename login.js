@@ -1,4 +1,5 @@
-const apiUrl = 'https://clipboard.copythingz.shop/api'; // ✅ Updated domain
+// login.js
+const apiUrl = 'https://copythingz.shop/api'; // Define the API base URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
@@ -19,48 +20,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        const username = document.getElementById('username').value.trim();
+        const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-
         try {
-            const response = await fetch(`${apiUrl}/login`, {
+            const res = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
+            const data = await res.json();
+            if (res.ok) {
                 showNotification('Login successful! Redirecting...', 'success');
-                localStorage.setItem('token', data.token);
                 setTimeout(() => {
-                    window.location.href = '/clipboard.html';
-                }, 2000);
+                    window.location.href = '/';
+                }, 1000);
             } else {
-                showNotification(data.message || 'Login failed. Please try again.', 'error');
+                showNotification(data.message, 'error');
             }
-        } catch (error) {
-            console.error('Login error:', error);
+        } catch (err) {
+            console.error(err);
             showNotification('An error occurred. Please try again.', 'error');
         }
     });
 });
 
+// Function to display notifications
 function showNotification(message, type) {
     const notification = document.createElement('div');
     notification.textContent = message;
     notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
         type === 'success' ? 'bg-green-500' : 'bg-red-500'
     }`;
-
     document.body.appendChild(notification);
-
     setTimeout(() => {
         notification.remove();
     }, 3000);
