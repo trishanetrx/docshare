@@ -1,3 +1,5 @@
+const BASE_URL = 'https://clipboard.copythingz.shop/api';
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -5,7 +7,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value.trim();
 
     try {
-        const res = await fetch('https://copythingz.shop/api/login', {
+        const res = await fetch(`${BASE_URL}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
