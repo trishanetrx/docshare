@@ -1,5 +1,5 @@
 // login.js
-const apiUrl = 'https://copythingz.shop/api'; // Define the API base URL
+const apiUrl = 'https://api.copythingz.shop'; // Define the API base URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
