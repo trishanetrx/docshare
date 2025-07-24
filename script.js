@@ -1,3 +1,5 @@
+const BASE_URL = 'https://clipboard.copythingz.shop/api';
+
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
 
@@ -8,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Load clipboard data
-    fetch('https://copythingz.shop/api/clipboard', {
+    fetch(`${BASE_URL}/clipboard`, {
         headers: { Authorization: `Bearer ${token}` }
     })
         .then(res => res.json())
@@ -28,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Load file list
-    fetch('https://copythingz.shop/api/files', {
+    fetch(`${BASE_URL}/files`, {
         headers: { Authorization: `Bearer ${token}` }
     })
         .then(res => res.json())
