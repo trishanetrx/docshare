@@ -1,3 +1,5 @@
+const BASE_URL = 'https://clipboard.copythingz.shop/api';
+
 document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -11,7 +13,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     }
 
     try {
-        const res = await fetch('https://copythingz.shop/api/register', {
+        const res = await fetch(`${BASE_URL}/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
