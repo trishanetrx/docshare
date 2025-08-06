@@ -1,5 +1,4 @@
-// login.js
-const apiUrl = 'https://api.copythingz.shop'; // Define the API base URL
+const apiUrl = 'https://copythingz.shop/api'; // Define the API base URL
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
@@ -20,28 +19,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const form = document.getElementById('loginForm');
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+
         try {
-            const res = await fetch(`${apiUrl}/login`, {
+            const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
             });
-            const data = await res.json();
-            if (res.ok) {
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Display success message
                 showNotification('Login successful! Redirecting...', 'success');
+
+                // Store the auth token in localStorage
+                localStorage.setItem('token', data.token);
+
+                // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
+                    window.location.href = '/clipboard.html';
+                }, 2000);
             } else {
-                showNotification(data.message, 'error');
+                // Display error message
+                showNotification(data.message || 'Login failed. Please try again.', 'error');
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error('Login error:', error);
             showNotification('An error occurred. Please try again.', 'error');
         }
     });
@@ -54,7 +65,10 @@ function showNotification(message, type) {
     notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
         type === 'success' ? 'bg-green-500' : 'bg-red-500'
     }`;
+
     document.body.appendChild(notification);
+
+    // Automatically remove the notification after 3 seconds
     setTimeout(() => {
         notification.remove();
     }, 3000);
