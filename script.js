@@ -1,5 +1,15 @@
 const apiUrl = 'https://copythingz.shop/api'; // ✅ Secure backend base URL
 
+// Helper: Get Authorization Header or throw if missing
+function getAuthHeader() {
+    const token = localStorage.getItem('token');
+    if (!token || !token.startsWith('ey')) {
+        showMessage('Missing or invalid token. Please log in again.');
+        throw new Error('No valid token');
+    }
+    return { Authorization: `Bearer ${token}` };
+}
+
 // Display status messages
 function showMessage(message, type = 'error') {
     const statusMessage = document.getElementById('statusMessage');
@@ -25,13 +35,12 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
     const text = document.getElementById('clipboardInput').value;
     if (!text) return showMessage('Please enter some text.');
 
-    const authToken = localStorage.getItem('token');
     try {
         const res = await fetch(`${apiUrl}/clipboard`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
+                ...getAuthHeader()
             },
             body: JSON.stringify({ text })
         });
@@ -61,11 +70,10 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
 
 // Clear clipboard
 document.getElementById('clearClipboard').addEventListener('click', async () => {
-    const authToken = localStorage.getItem('token');
     try {
         const res = await fetch(`${apiUrl}/clipboard`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: getAuthHeader()
         });
 
         if (res.ok) {
@@ -82,10 +90,9 @@ document.getElementById('clearClipboard').addEventListener('click', async () => 
 
 // Load clipboard
 async function loadClipboard() {
-    const authToken = localStorage.getItem('token');
     try {
         const res = await fetch(`${apiUrl}/clipboard`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: getAuthHeader()
         });
 
         const data = await res.json();
@@ -120,17 +127,15 @@ document.getElementById('uploadButton').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
     if (!file) return showMessage('Please select a file to upload.');
-
     if (file.size > 700 * 1024 * 1024) return showMessage('File size exceeds 700 MB.');
 
     const formData = new FormData();
     formData.append('file', file);
-    const authToken = localStorage.getItem('token');
 
     try {
         const res = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` },
+            headers: getAuthHeader(),
             body: formData
         });
 
@@ -150,10 +155,9 @@ document.getElementById('uploadButton').addEventListener('click', async () => {
 
 // Load files
 async function loadFiles() {
-    const authToken = localStorage.getItem('token');
     try {
         const res = await fetch(`${apiUrl}/files`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: getAuthHeader()
         });
 
         const files = await res.json();
@@ -173,7 +177,7 @@ async function loadFiles() {
                 link.onclick = async (e) => {
                     e.preventDefault();
                     const res = await fetch(`${apiUrl}/files/${file}`, {
-                        headers: { 'Authorization': `Bearer ${authToken}` }
+                        headers: getAuthHeader()
                     });
                     if (!res.ok) return showMessage('Failed to download the file.');
                     const blob = await res.blob();
@@ -203,11 +207,10 @@ async function loadFiles() {
 
 // Delete file
 async function deleteFile(filename) {
-    const authToken = localStorage.getItem('token');
     try {
         const res = await fetch(`${apiUrl}/files/${filename}`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: getAuthHeader()
         });
 
         if (res.ok) {
