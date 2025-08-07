@@ -11,11 +11,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Secret key for JWT signing
-const JWT_SECRET = 'your-secure-secret-key'; // Replace with a strong key in production
+const JWT_SECRET = '870293100v'; // Replace with a strong key in production
 
 // Middleware configuration
 app.use(cors({
-    origin: 'https://clipboard.negombotech.com', // Allow requests from Netlify frontend
+    //origin: 'https://clipboard.copythingz.shop', // Allow requests from Netlify frontend
+    origin: ['https://copythingz.shop', 'https://clipboard.copythingz.shop', 'https://copythingz.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -24,7 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve u
 
 // Handle CORS preflight requests
 app.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', 'https://clipboard.negombotech.com');
+    res.header('Access-Control-Allow-Origin', 'https://clipboard.copythingz.shop');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.sendStatus(204); // Respond with no content for preflight
