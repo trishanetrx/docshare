@@ -36,20 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            if (response.ok) {
-                // Display success message
+            if (response.ok && data.token) {
+                localStorage.setItem('token', data.token);
                 showNotification('Login successful! Redirecting...', 'success');
 
-                // Store the auth token in localStorage
-                localStorage.setItem('token', data.token);
-
-                // Redirect after a short delay
                 setTimeout(() => {
                     window.location.href = '/clipboard.html';
                 }, 2000);
             } else {
-                // Display error message
-                showNotification(data.message || 'Login failed. Please try again.', 'error');
+                showNotification(data.message || 'Login failed. No token received.', 'error');
             }
         } catch (error) {
             console.error('Login error:', error);
