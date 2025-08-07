@@ -127,7 +127,7 @@ document.getElementById('uploadButton').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
     if (!file) return showMessage('Please select a file to upload.');
-    if (file.size > 700 * 1024 * 1024) return showMessage('File size exceeds 700 MB.');
+    if (file.size > 2500 * 1024 * 1024) return showMessage('File size exceeds 2500 MB.');
 
     const formData = new FormData();
     formData.append('file', file);
