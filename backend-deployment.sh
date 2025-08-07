@@ -1,37 +1,30 @@
 #!/bin/bash
+set -e
 
-# Update system and install necessary dependencies
-echo "Updating system and installing dependencies..."
-sudo apt update -y
-sudo apt upgrade -y
-sudo apt install -y nodejs npm nginx certbot python3-certbot-nginx 
+DOMAIN="copythingz.shop"
+EMAIL="admin@$DOMAIN"  # Change if needed
+APP_DIR="/root/clipboard-backend"
+UPLOADS_DIR="$APP_DIR/uploads"
+NGINX_CONF="/etc/nginx/sites-available/clipboard-backend"
 
-# Install backend dependencies (express, cors)
-echo "Setting up backend and installing Node.js dependencies..."
-mkdir -p ~/clipboard-backend
-mkdir -p ~/clipboard-backend/uploads
-cd ~/clipboard-backend
-npm init -y
-npm install express cors
-npm install multer
-npm install -g pm2
-npm install
-npm install express cors multer bcryptjs jsonwebtoken body-parser
+echo "📦 Updating system and installing dependencies..."
+apt update -y
+apt install -y curl git nginx certbot python3-certbot-nginx nodejs npm
 
-#Clone and Move Certificate files
-git clone https://github.com/trishanetrx/docshare.git /tmp/docshare
+echo "🛠 Ensuring Node.js version is correct..."
+NODE_VERSION=$(node -v || true)
+if [[ "$NODE_VERSION" != v20* ]]; then
+  echo "Installing Node.js v20.x..."
+  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  apt install -y nodejs
+fi
 
-sudo mkdir -p /etc/letsencrypt/live/negombotech.com/
-sudo mkdir -p /etc/letsencrypt/
+echo "⚙️ Setting up clipboard backend directory..."
+mkdir -p "$UPLOADS_DIR"
+cd "$APP_DIR"
 
-# Move the files
-sudo mv /tmp/docshare/certificates/cert.pem /etc/letsencrypt/live/negombotech.com/fullchain.pem
-sudo mv /tmp/docshare/certificates/privkey.pem /etc/letsencrypt/live/negombotech.com/privkey.pem
-sudo mv /tmp/docshare/certificates/options-ssl-nginx.conf /etc/letsencrypt/options-ssl-nginx.conf
-sudo mv /tmp/docshare/certificates/ssl-dhparams.pem /etc/letsencrypt/ssl-dhparams.pem
-
-# Create the server.js file
-cat <<EOL > ~/clipboard-backend/server.js
+echo "📁 Writing server.js..."
+cat <<'EOF' > "$APP_DIR/server.js"
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -45,11 +38,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Secret key for JWT signing
-const JWT_SECRET = 'your-secure-secret-key'; // Replace with a strong key in production
+const JWT_SECRET = '870293100v'; // Replace with a strong key in production
 
 // Middleware configuration
 app.use(cors({
-    origin: 'https://clipboard.negombotech.com', // Allow requests from Netlify frontend
+    //origin: 'https://clipboard.copythingz.shop', // Allow requests from Netlify frontend
+    origin: ['https://copythingz.shop', 'https://clipboard.copythingz.shop', 'https://copythingz.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -58,7 +52,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve u
 
 // Handle CORS preflight requests
 app.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', 'https://clipboard.negombotech.com');
+    res.header('Access-Control-Allow-Origin', 'https://clipboard.copythingz.shop');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.sendStatus(204); // Respond with no content for preflight
@@ -77,11 +71,11 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        const filename = \`\${file.originalname.replace(ext, '')}-\${Date.now()}\${ext}\`; // Fixed syntax
+        const filename = `${file.originalname.replace(ext, '')}-${Date.now()}${ext}`; // Fixed syntax
         cb(null, filename);
     }
 });
-const upload = multer({ storage, limits: { fileSize: 700 * 1024 * 1024 } }); // 700 MB limit
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } }); // 50 MB limit
 
 // Routes
 
@@ -210,64 +204,78 @@ app.use('/api', router);
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(\`Server is running on http://localhost:\${PORT}\`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
-EOL
+EOF
 
-# Restart backend using PM2
+echo "📝 Writing package.json and installing dependencies..."
+npm init -y
+npm install express@4 cors multer bcryptjs jsonwebtoken body-parser
+
+echo "🚀 Installing PM2 and starting app..."
+npm install -g pm2
 pm2 stop clipboard-backend || true
 pm2 delete clipboard-backend || true
-pm2 start ~/clipboard-backend/server.js --name clipboard-backend
+pm2 start "$APP_DIR/server.js" --name clipboard-backend
+pm2 save
+pm2 startup systemd -u root --hp /root
 
-echo "Configuring NGINX..."
-NGINX_CONF="/etc/nginx/sites-available/clipboard-backend"
-if [ -f "$NGINX_CONF" ]; then
-    echo "Removing existing NGINX configuration..."
-    sudo rm "$NGINX_CONF"
-fi
-
-#Create the nginx Configuration
-cat <<'EOL' | sudo tee "$NGINX_CONF"
+echo "🌐 Configuring NGINX..."
+cat <<EOF > "$NGINX_CONF"
 server {
     listen 80;
-    server_name negombotech.com www.negombotech.com;
+    server_name $DOMAIN www.$DOMAIN;
 
-    # Redirect HTTP to HTTPS
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://\$host\$request_uri;
+    }
+}
+EOF
+
+echo "🔗 Enabling NGINX site and disabling default..."
+ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/clipboard-backend
+rm -f /etc/nginx/sites-enabled/default
+
+echo "🔍 Testing and reloading NGINX (HTTP only)..."
+nginx -t
+systemctl reload nginx
+
+echo "🔐 Requesting SSL certificate from Let's Encrypt..."
+certbot --nginx -d $DOMAIN -d www.$DOMAIN --agree-tos --email "$EMAIL" --non-interactive
+
+echo "📝 Rewriting NGINX config with SSL and backend proxy..."
+cat <<EOF > "$NGINX_CONF"
+server {
+    listen 80;
+    server_name $DOMAIN www.$DOMAIN;
+
+    location / {
+        return 301 https://\$host\$request_uri;
     }
 }
 
 server {
     listen 443 ssl;
-    server_name negombotech.com www.negombotech.com;
+    server_name $DOMAIN www.$DOMAIN;
 
-    # SSL Certificates
-    ssl_certificate /etc/letsencrypt/live/negombotech.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/negombotech.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     client_max_body_size 700M;
 
-    # Proxy API requests to the backend
     location /api/ {
-        proxy_pass http://localhost:3000; # Proxy to Node.js backend
+        proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
 
-        # CORS Headers
-       # add_header 'Access-Control-Allow-Origin' 'https://clipboard.negombotech.com' always;
-       # add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-       # add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
-
-        # Handle preflight OPTIONS requests
-        if ($request_method = OPTIONS) {
-            add_header 'Access-Control-Allow-Origin' 'https://clipboard.negombotech.com' always;
+        if (\$request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin \$http_origin always;
             add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
             add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization' always;
             add_header 'Content-Length' 0;
@@ -276,35 +284,20 @@ server {
         }
     }
 
-    # Serve uploaded files
     location /uploads/ {
-        alias /root/clipboard-backend/uploads;
-        try_files $uri $uri/ =404;
+        alias $UPLOADS_DIR;
+        try_files \$uri \$uri/ =404;
         add_header Cache-Control "public, max-age=3600";
     }
 
-    error_log /var/log/nginx/negombotech_error.log;
-    access_log /var/log/nginx/negombotech_access.log;
+    error_log /var/log/nginx/${DOMAIN}_error.log;
+    access_log /var/log/nginx/${DOMAIN}_access.log;
 }
-EOL
+EOF
 
-# Enable the NGINX site
-sudo ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/
+echo "🔁 Reloading NGINX with SSL config..."
+nginx -t
+systemctl reload nginx
 
-# Test NGINX configuration
-echo "Testing NGINX configuration..."
-sudo nginx -t || { echo "NGINX configuration test failed!"; exit 1; }
-
-# Restart NGINX service
-echo "Restarting NGINX..."
-sudo systemctl restart nginx || { echo "NGINX restart failed!"; exit 1; }
-
-# Obtain SSL certificate using Certbot
-#echo "Obtaining SSL certificate..."
-#sudo certbot --nginx -d negombotech.com -d www.negombotech.com --agree-tos --non-interactive --email mytest@negombo.com
-
-# Reload NGINX to apply SSL
-echo "Reloading NGINX to apply SSL..."
-sudo systemctl reload nginx
-
-echo "Deployment completed successfully!"
+echo "✅ Deployment completed successfully!"
+echo "Visit: https://$DOMAIN/api"
