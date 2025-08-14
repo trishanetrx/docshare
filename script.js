@@ -122,34 +122,85 @@ async function loadClipboard() {
     }
 }
 
-// Upload file
+// Upload file (with progress bar using XMLHttpRequest)
 document.getElementById('uploadButton').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
+    const progressEl = document.getElementById('uploadProgress');
+    const uploadBtn = document.getElementById('uploadButton');
     const file = fileInput.files[0];
+
     if (!file) return showMessage('Please select a file to upload.');
     if (file.size > 2500 * 1024 * 1024) return showMessage('File size exceeds 2500 MB.');
 
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
-        const res = await fetch(`${apiUrl}/upload`, {
-            method: 'POST',
-            headers: getAuthHeader(),
-            body: formData
-        });
+    // Show & reset progress bar
+    progressEl.classList.remove('hidden');
+    progressEl.value = 0;
+    uploadBtn.disabled = true;
 
-        if (res.ok) {
-            showMessage('File uploaded successfully!', 'success');
-            fileInput.value = '';
-            await loadFiles();
-        } else {
-            const errorData = await res.json();
-            showMessage(errorData.message || 'Failed to upload file.');
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${apiUrl}/upload`, true);
+
+        // Set auth header
+        const auth = getAuthHeader();
+        if (auth.Authorization) {
+            xhr.setRequestHeader('Authorization', auth.Authorization);
         }
+
+        // Progress updates
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                progressEl.value = pct;
+            }
+        };
+
+        xhr.onload = async () => {
+            uploadBtn.disabled = false;
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                showMessage('File uploaded successfully!', 'success');
+                fileInput.value = '';
+                progressEl.value = 100;
+                await loadFiles();
+            } else {
+                // Try to read server error message
+                try {
+                    const err = JSON.parse(xhr.responseText);
+                    showMessage(err.message || 'Failed to upload file.');
+                } catch {
+                    showMessage('Failed to upload file.');
+                }
+            }
+
+            // Hide bar shortly after completion
+            setTimeout(() => {
+                progressEl.classList.add('hidden');
+                progressEl.value = 0;
+            }, 800);
+        };
+
+        xhr.onerror = () => {
+            uploadBtn.disabled = false;
+            showMessage('An error occurred while uploading the file.');
+            setTimeout(() => {
+                progressEl.classList.add('hidden');
+                progressEl.value = 0;
+            }, 800);
+        };
+
+        xhr.send(formData);
     } catch (err) {
+        uploadBtn.disabled = false;
         console.error(err);
         showMessage('An error occurred while uploading the file.');
+        setTimeout(() => {
+            progressEl.classList.add('hidden');
+            progressEl.value = 0;
+        }, 800);
     }
 });
 
