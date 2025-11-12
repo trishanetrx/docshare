@@ -1,4 +1,4 @@
-const apiUrl = 'https://copythingz.shop/api'; // ✅ Secure backend base URL
+const apiUrl = 'https://api.copythingz.shop/api'; // ✅ Secure backend base URL
 
 // Helper: Get Authorization Header or throw if missing
 function getAuthHeader() {
