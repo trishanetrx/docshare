@@ -249,6 +249,57 @@ progress::-moz-progress-bar      { background: var(--accent); border-radius: 99p
     margin-top: 1.5rem;
 }
 
+/* ── Tab bar ───────────────────────────────────────────────────────────────── */
+.tab-bar {
+    display: flex;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+
+.tab-item {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .8rem 1rem;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color .15s, border-color .15s;
+    margin-bottom: -1px;
+}
+.tab-item:hover { color: var(--text); text-decoration: none; }
+.tab-item.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+.tab-item i { font-size: .85rem; }
+
+@media (max-width: 768px) {
+    .tab-bar {
+        padding: 0;
+        justify-content: stretch;
+    }
+    .tab-item {
+        flex: 1;
+        justify-content: center;
+        padding: .85rem .5rem;
+        font-size: .78rem;
+        gap: .3rem;
+    }
+    .tab-item i { font-size: .9rem; }
+}
+
 /* ── App layout ────────────────────────────────────────────────────────────── */
 .app-layout {
     display: flex;
@@ -442,6 +493,7 @@ progress::-moz-progress-bar      { background: var(--accent); border-radius: 99p
     border: 1px solid var(--border);
     border-radius: var(--radius);
     margin-bottom: .5rem;
+    flex-wrap: wrap;
 }
 
 .file-icon {
@@ -459,6 +511,7 @@ progress::-moz-progress-bar      { background: var(--accent); border-radius: 99p
 
 .file-name {
     flex: 1;
+    min-width: 0;
     font-size: .875rem;
     color: var(--text);
     overflow: hidden;
@@ -466,7 +519,12 @@ progress::-moz-progress-bar      { background: var(--accent); border-radius: 99p
     white-space: nowrap;
 }
 
-.file-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+.file-actions {
+    display: flex;
+    gap: .4rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
 
 .file-progress-wrap {
     padding: 0 1rem .75rem;
@@ -546,6 +604,17 @@ progress::-moz-progress-bar      { background: var(--accent); border-radius: 99p
     .sidebar-overlay.open { display: block; }
     .menu-toggle { display: flex; }
     .app-content { padding: 1.25rem; }
+
+    /* On mobile, show icon-only buttons in file rows to save space */
+    .file-actions .btn span { display: none; }
+    .file-actions .btn {
+        padding: .4rem .55rem;
+        min-width: unset;
+    }
+
+    /* Keep file name + actions on same line, actions wrap below only if truly needed */
+    .file-row { flex-wrap: nowrap; }
+    .file-name { min-width: 0; }
 }
 
 /* Landing page */

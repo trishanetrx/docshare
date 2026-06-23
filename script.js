@@ -36,25 +36,36 @@ function initUser() {
 
 // ── Sidebar / nav ─────────────────────────────────────────────────────────────
 function initNav() {
-    const navItems  = document.querySelectorAll('.nav-item[data-panel]');
-    const panels    = document.querySelectorAll('.panel');
+    const navItems    = document.querySelectorAll('.nav-item[data-panel]');
+    const tabItems    = document.querySelectorAll('.tab-item[data-panel]');
+    const panels      = document.querySelectorAll('.panel');
     const topbarTitle = document.getElementById('topbarTitle');
 
+    function switchPanel(panelId, label) {
+        panels.forEach(p => p.classList.remove('active'));
+        navItems.forEach(n => n.classList.remove('active'));
+        tabItems.forEach(t => t.classList.remove('active'));
+
+        document.getElementById(panelId)?.classList.add('active');
+        topbarTitle.textContent = label;
+
+        navItems.forEach(n => { if (n.dataset.panel === panelId) n.classList.add('active'); });
+        tabItems.forEach(t => { if (t.dataset.panel === panelId) t.classList.add('active'); });
+        closeSidebar();
+    }
+
     navItems.forEach(btn => {
-        btn.addEventListener('click', () => {
-            navItems.forEach(n => n.classList.remove('active'));
-            panels.forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.panel).classList.add('active');
-            topbarTitle.textContent = btn.textContent.trim();
-            closeSidebar();
-        });
+        btn.addEventListener('click', () => switchPanel(btn.dataset.panel, btn.textContent.trim()));
+    });
+
+    tabItems.forEach(btn => {
+        btn.addEventListener('click', () => switchPanel(btn.dataset.panel, btn.querySelector('span')?.textContent.trim() || ''));
     });
 
     // Mobile sidebar
-    const sidebar  = document.getElementById('sidebar');
-    const overlay  = document.getElementById('sidebarOverlay');
-    const toggle   = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggle  = document.getElementById('menuToggle');
 
     toggle.addEventListener('click', () => {
         sidebar.classList.add('open');
@@ -285,13 +296,13 @@ function buildFileRow(filename) {
     const dlBtn = document.createElement('button');
     dlBtn.className = 'btn btn-ghost';
     dlBtn.style.padding = '.35rem .75rem';
-    dlBtn.innerHTML = '<i class="fas fa-download"></i>';
+    dlBtn.innerHTML = '<i class="fas fa-download"></i> <span>Download</span>';
     dlBtn.title = 'Download';
 
     const shareBtn = document.createElement('button');
     shareBtn.className = 'btn btn-ghost';
     shareBtn.style.padding = '.35rem .75rem';
-    shareBtn.innerHTML = '<i class="fas fa-share-nodes"></i>';
+    shareBtn.innerHTML = '<i class="fas fa-share-nodes"></i> <span>Share</span>';
     shareBtn.title = 'Share with PIN';
     shareBtn.addEventListener('click', () => shareFile(filename));
 
