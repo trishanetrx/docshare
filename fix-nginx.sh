@@ -1,6 +1,5 @@
 #!/bin/bash
-# Fix Nginx config - move /api/ block BEFORE the static asset regex
-# so DELETE/PUT requests to /api/files/*.ext aren't blocked by Nginx
+# Fix Nginx - use negative lookahead to exclude /api/ from static asset regex
 cat > /etc/nginx/sites-available/docshare << 'EOF'
 server {
     listen 80;
@@ -22,8 +21,7 @@ server {
     root   /root/docshare/public;
     index  index.html;
 
-    # API proxy MUST come before the static asset regex
-    # so /api/files/photo.jpg DELETE isn't caught by the regex below
+    # API — exact prefix, no regex interference
     location /api/ {
         proxy_pass         http://127.0.0.1:3001;
         proxy_http_version 1.1;
@@ -39,8 +37,8 @@ server {
         proxy_send_timeout    600s;
     }
 
-    # Static asset caching (only applies to non-API paths now)
-    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+    # Static asset caching — explicitly skip /api/ paths using negative regex
+    location ~* ^(?!/api/).*\.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
         expires 7d;
         add_header Cache-Control "public, immutable";
     }
@@ -60,4 +58,4 @@ server {
 }
 EOF
 
-nginx -t && systemctl reload nginx && echo "Nginx fixed and reloaded"
+nginx -t && systemctl reload nginx && echo "Nginx fixed OK"

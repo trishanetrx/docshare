@@ -195,7 +195,9 @@ server {
         proxy_send_timeout    600s;
     }
 
-    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+    # Static asset caching — negative lookahead excludes /api/ paths
+    # so DELETE/PUT on /api/files/photo.png are not blocked here
+    location ~* ^(?!/api/).*\.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
         expires 7d;
         add_header Cache-Control "public, immutable";
     }
