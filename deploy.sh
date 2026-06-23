@@ -101,11 +101,13 @@ module.exports = {
     apps: [{
         name: 'docshare',
         script: './server.js',
+        exec_mode: 'fork',
         instances: 1,
         autorestart: true,
         watch: false,
         env_production: {
-            NODE_ENV: 'production'
+            NODE_ENV: 'production',
+            PORT: 3001
         }
     }]
 };
@@ -185,7 +187,7 @@ server {
 
     # â”€â”€ API â†’ Express (localhost:3000) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     location /api/ {
-        proxy_pass         http://127.0.0.1:3000;
+        proxy_pass         http://127.0.0.1:3001;
         proxy_http_version 1.1;
         proxy_set_header   Host              \$host;
         proxy_set_header   X-Real-IP         \$remote_addr;
