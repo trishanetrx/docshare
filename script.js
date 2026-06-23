@@ -287,6 +287,13 @@ function buildFileRow(filename) {
     dlBtn.innerHTML = '<i class="fas fa-download"></i>';
     dlBtn.title = 'Download';
 
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'btn btn-ghost';
+    shareBtn.style.padding = '.35rem .75rem';
+    shareBtn.innerHTML = '<i class="fas fa-share-nodes"></i>';
+    shareBtn.title = 'Share with PIN';
+    shareBtn.addEventListener('click', () => shareFile(filename));
+
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-danger';
     delBtn.style.padding = '.35rem .75rem';
@@ -295,6 +302,7 @@ function buildFileRow(filename) {
     delBtn.addEventListener('click', () => deleteFile(filename));
 
     actions.appendChild(dlBtn);
+    actions.appendChild(shareBtn);
     actions.appendChild(delBtn);
     row.appendChild(icon);
     row.appendChild(name);
@@ -440,8 +448,164 @@ uploadBtn.addEventListener('click', () => {
     xhr.send(formData);
 });
 
+// ── Share PIN ─────────────────────────────────────────────────────────────────
+async function shareFile(filename) {
+    try {
+        const res  = await fetch(`${apiUrl}/shares`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+            body: JSON.stringify({ filename, ttlHours: 24 }),
+        });
+        const data = await res.json();
+        if (!res.ok) { toast(data.message || 'Failed to create share.'); return; }
+        showShareModal(filename, data.pin, data.expiresAt);
+        await loadShares();
+    } catch { toast('Failed to create share.'); }
+}
+
+function showShareModal(filename, pin, expiresAt) {
+    // Remove any existing modal
+    document.getElementById('shareModal')?.remove();
+
+    const shareUrl = `${window.location.origin}/share.html?pin=${pin}`;
+    const expiresIn = Math.round((expiresAt - Date.now()) / 1000 / 60 / 60);
+
+    const modal = document.createElement('div');
+    modal.id = 'shareModal';
+    modal.style.cssText = `
+        position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;
+        display:flex;align-items:center;justify-content:center;padding:1rem;`;
+
+    modal.innerHTML = `
+        <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+                    padding:2rem;max-width:440px;width:100%;box-shadow:var(--shadow);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+                <h3 style="font-size:1rem;font-weight:600;color:var(--text);">
+                    <i class="fas fa-share-nodes" style="color:var(--accent);margin-right:.5rem;"></i>
+                    Share File
+                </h3>
+                <button id="closeShareModal" class="btn-icon"><i class="fas fa-xmark"></i></button>
+            </div>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${filename}">
+                ${filename}
+            </p>
+
+            <p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:.5rem;font-weight:600;">PIN</p>
+            <div style="display:flex;gap:.6rem;margin-bottom:1.25rem;">
+                <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+                            padding:.65rem 1rem;font-size:1.75rem;font-weight:800;letter-spacing:.25em;
+                            color:var(--accent);text-align:center;font-family:monospace;">
+                    ${pin}
+                </div>
+                <button class="btn btn-ghost" id="copyPinBtn" title="Copy PIN">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:.5rem;font-weight:600;">Share Link</p>
+            <div style="display:flex;gap:.6rem;margin-bottom:1.25rem;">
+                <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+                            padding:.65rem .85rem;font-size:.78rem;color:var(--text-dim);
+                            overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    ${shareUrl}
+                </div>
+                <button class="btn btn-ghost" id="copyLinkBtn" title="Copy link">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <p style="font-size:.78rem;color:var(--text-muted);text-align:center;">
+                <i class="fas fa-clock" style="margin-right:.3rem;"></i>
+                Expires in ${expiresIn} hour(s) &nbsp;·&nbsp; Anyone with the PIN can download this file
+            </p>
+        </div>`;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('closeShareModal').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+    document.getElementById('copyPinBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(pin).then(() => toast('PIN copied!', 'success'));
+    });
+    document.getElementById('copyLinkBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(shareUrl).then(() => toast('Link copied!', 'success'));
+    });
+}
+
+async function loadShares() {
+    try {
+        const res    = await fetch(`${apiUrl}/shares`, { headers: getAuthHeader() });
+        const shares = await res.json();
+        renderShares(shares);
+    } catch (err) {
+        if (err.message !== 'No valid token') console.error('Failed to load shares');
+    }
+}
+
+function renderShares(shares) {
+    const container = document.getElementById('activeShares');
+    const section   = document.getElementById('sharesSection');
+    if (!container) return;
+
+    const active = shares.filter(s => s.expiresAt > Date.now());
+    section.style.display = active.length ? 'block' : 'none';
+    container.innerHTML = '';
+
+    active.forEach(share => {
+        const row = document.createElement('div');
+        row.className = 'file-row';
+        row.style.marginBottom = '.4rem';
+
+        const expiresIn = Math.round((share.expiresAt - Date.now()) / 1000 / 60 / 60);
+
+        row.innerHTML = `
+            <div class="file-icon" style="background:rgba(34,197,94,.1);">
+                <i class="fas fa-link" style="color:#22c55e;"></i>
+            </div>
+            <div style="flex:1;overflow:hidden;">
+                <div class="file-name">${share.filename}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);margin-top:.1rem;">
+                    PIN: <strong style="color:var(--accent);font-family:monospace;letter-spacing:.1em;">${share.pin}</strong>
+                    &nbsp;·&nbsp; Expires in ${expiresIn}h
+                </div>
+            </div>
+            <div class="file-actions">
+                <button class="btn btn-ghost copy-share-btn" data-pin="${share.pin}"
+                        style="padding:.35rem .75rem;" title="Copy share link">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="btn btn-danger revoke-btn" data-pin="${share.pin}"
+                        style="padding:.35rem .75rem;" title="Revoke">
+                    <i class="fas fa-ban"></i>
+                </button>
+            </div>`;
+
+        row.querySelector('.copy-share-btn').addEventListener('click', () => {
+            const url = `${window.location.origin}/share.html?pin=${share.pin}`;
+            navigator.clipboard.writeText(url).then(() => toast('Link copied!', 'success'));
+        });
+        row.querySelector('.revoke-btn').addEventListener('click', () => revokeShare(share.pin));
+
+        container.appendChild(row);
+    });
+}
+
+async function revokeShare(pin) {
+    if (!confirm(`Revoke share PIN ${pin}?`)) return;
+    try {
+        const res = await fetch(`${apiUrl}/shares/${pin}`, {
+            method: 'DELETE',
+            headers: getAuthHeader(),
+        });
+        if (res.ok) { toast('Share revoked.', 'info'); await loadShares(); }
+        else toast('Failed to revoke share.');
+    } catch { toast('Failed to revoke share.'); }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 initUser();
 initNav();
 loadClipboard();
 loadFiles();
+loadShares();

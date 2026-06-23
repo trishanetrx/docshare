@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Shared File — ClipShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .pin-input-group {
+            display: flex;
+            gap: .5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        .pin-digit {
+            width: 52px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            caret-color: var(--accent);
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .pin-digit:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,110,247,.2);
+        }
+        .pin-digit.filled { border-color: var(--accent); }
+        .file-info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .file-info-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: .75rem;
+        }
+        .file-info-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+            word-break: break-all;
+            margin-bottom: .4rem;
+        }
+        .file-info-meta {
+            font-size: .8rem;
+            color: var(--text-muted);
+        }
+        .expires-warn {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: .75rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div class="auth-page">
+        <div class="auth-box" style="max-width:480px;">
+
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fas fa-clipboard"></i></div>
+                <span class="auth-logo-text">ClipShare</span>
+            </div>
+
+            <!-- Step 1: PIN entry -->
+            <div id="pinStep">
+                <h1 class="auth-title" style="text-align:center;">Enter PIN</h1>
+                <p class="auth-subtitle" style="text-align:center;">
+                    Enter the 6-character PIN to access the shared file.
+                </p>
+
+                <div class="pin-input-group" id="pinInputGroup">
+                    <input class="pin-digit" maxlength="1" data-idx="0" inputmode="text" autocomplete="off">
+                    <input class="pin-digit" maxlength="1" data-idx="1" inputmode="text" autocomplete="off">
+                    <input class="pin-digit" maxlength="1" data-idx="2" inputmode="text" autocomplete="off">
+                    <input class="pin-digit" maxlength="1" data-idx="3" inputmode="text" autocomplete="off">
+                    <input class="pin-digit" maxlength="1" data-idx="4" inputmode="text" autocomplete="off">
+                    <input class="pin-digit" maxlength="1" data-idx="5" inputmode="text" autocomplete="off">
+                </div>
+
+                <button class="btn btn-primary" id="lookupBtn"
+                        style="width:100%;justify-content:center;padding:.75rem;font-size:.95rem;" disabled>
+                    <i class="fas fa-magnifying-glass"></i>
+                    <span id="lookupLabel">Look Up File</span>
+                </button>
+
+                <p style="text-align:center;font-size:.8rem;color:var(--text-muted);margin-top:1rem;">
+                    <a href="/">Back to ClipShare</a>
+                </p>
+            </div>
+
+            <!-- Step 2: File info + download -->
+            <div id="fileStep" style="display:none;">
+                <div class="file-info-box">
+                    <div class="file-info-icon" id="fileIcon"><i class="fas fa-file"></i></div>
+                    <div class="file-info-name" id="fileName">filename.ext</div>
+                    <div class="file-info-meta">
+                        Shared by <strong id="fileOwner"></strong>
+                    </div>
+                    <div class="expires-warn" id="fileExpires"></div>
+                </div>
+
+                <!-- Download progress -->
+                <div id="dlProgressWrap" style="display:none;margin-bottom:1rem;">
+                    <progress id="dlProgress" value="0" max="100"></progress>
+                    <p id="dlProgressLabel" style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem;text-align:center;"></p>
+                </div>
+
+                <button class="btn btn-primary" id="downloadBtn"
+                        style="width:100%;justify-content:center;padding:.75rem;font-size:.95rem;">
+                    <i class="fas fa-download"></i> Download File
+                </button>
+
+                <button class="btn btn-ghost" id="tryAnotherBtn"
+                        style="width:100%;justify-content:center;padding:.6rem;font-size:.85rem;margin-top:.6rem;">
+                    Try another PIN
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = '/api';
+
+        function toast(message, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            const icon = type === 'success' ? 'fa-circle-check'
+                        : type === 'info'    ? 'fa-circle-info'
+                        :                     'fa-circle-exclamation';
+            el.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
+
+        function formatBytes(bytes) {
+            if (bytes < 1024)       return bytes + ' B';
+            if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+            return (bytes / 1073741824).toFixed(2) + ' GB';
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const map = {
+                pdf:'fa-file-pdf', doc:'fa-file-word', docx:'fa-file-word',
+                xls:'fa-file-excel', xlsx:'fa-file-excel',
+                zip:'fa-file-zipper', rar:'fa-file-zipper', gz:'fa-file-zipper',
+                jpg:'fa-file-image', jpeg:'fa-file-image', png:'fa-file-image',
+                gif:'fa-file-image', svg:'fa-file-image', webp:'fa-file-image',
+                mp4:'fa-file-video', mov:'fa-file-video', avi:'fa-file-video',
+                mp3:'fa-file-audio', wav:'fa-file-audio',
+                js:'fa-file-code', ts:'fa-file-code', py:'fa-file-code',
+                html:'fa-file-code', css:'fa-file-code', json:'fa-file-code',
+                txt:'fa-file-lines', md:'fa-file-lines',
+            };
+            return map[ext] || 'fa-file';
+        }
+
+        // ── PIN input behaviour ───────────────────────────────────────────────
+        const digits   = document.querySelectorAll('.pin-digit');
+        const lookupBtn = document.getElementById('lookupBtn');
+
+        digits.forEach((input, i) => {
+            input.addEventListener('input', e => {
+                const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                e.target.value = val ? val.slice(-1) : '';
+                e.target.classList.toggle('filled', !!e.target.value);
+                if (val && i < digits.length - 1) digits[i + 1].focus();
+                checkPin();
+            });
+
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Backspace' && !input.value && i > 0) {
+                    digits[i - 1].focus();
+                    digits[i - 1].value = '';
+                    digits[i - 1].classList.remove('filled');
+                    checkPin();
+                }
+                if (e.key === 'Enter') lookupBtn.click();
+            });
+
+            // Handle paste on any digit
+            input.addEventListener('paste', e => {
+                e.preventDefault();
+                const pasted = (e.clipboardData.getData('text') || '')
+                    .toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+                [...pasted].forEach((char, idx) => {
+                    if (digits[idx]) {
+                        digits[idx].value = char;
+                        digits[idx].classList.add('filled');
+                    }
+                });
+                const next = Math.min(pasted.length, digits.length - 1);
+                digits[next].focus();
+                checkPin();
+            });
+        });
+
+        function getPin() {
+            return [...digits].map(d => d.value).join('').toUpperCase();
+        }
+
+        function checkPin() {
+            lookupBtn.disabled = getPin().length < 6;
+        }
+
+        // ── Look up PIN ───────────────────────────────────────────────────────
+        let currentPin = '';
+
+        lookupBtn.addEventListener('click', async () => {
+            const pin = getPin();
+            if (pin.length < 6) return;
+
+            lookupBtn.disabled = true;
+            document.getElementById('lookupLabel').textContent = 'Looking up…';
+
+            try {
+                const res  = await fetch(`${apiUrl}/share/${pin}`);
+                const data = await res.json();
+
+                if (!res.ok) {
+                    toast(data.message || 'Invalid PIN.');
+                    lookupBtn.disabled = false;
+                    document.getElementById('lookupLabel').textContent = 'Look Up File';
+                    return;
+                }
+
+                currentPin = pin;
+
+                // Show file info
+                document.getElementById('fileName').textContent  = data.filename;
+                document.getElementById('fileOwner').textContent = data.owner;
+                document.getElementById('fileIcon').innerHTML    =
+                    `<i class="fas ${getFileIcon(data.filename)}"></i>`;
+
+                const expiresIn = Math.round((data.expiresAt - Date.now()) / 1000 / 60);
+                const expiresText = expiresIn > 60
+                    ? `Expires in ${Math.round(expiresIn / 60)} hour(s)`
+                    : `Expires in ${expiresIn} minute(s)`;
+                document.getElementById('fileExpires').textContent = expiresText;
+
+                document.getElementById('pinStep').style.display  = 'none';
+                document.getElementById('fileStep').style.display = 'block';
+
+            } catch {
+                toast('Network error. Please try again.');
+                lookupBtn.disabled = false;
+                document.getElementById('lookupLabel').textContent = 'Look Up File';
+            }
+        });
+
+        // ── Download via PIN with progress ────────────────────────────────────
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const dlBtn         = document.getElementById('downloadBtn');
+            const progressWrap  = document.getElementById('dlProgressWrap');
+            const progressBar   = document.getElementById('dlProgress');
+            const progressLabel = document.getElementById('dlProgressLabel');
+
+            dlBtn.disabled = true;
+            progressWrap.style.display = 'block';
+            progressBar.value = 0;
+            progressLabel.textContent = 'Starting…';
+
+            try {
+                const res = await fetch(`${apiUrl}/share/${currentPin}/download`);
+                if (!res.ok) { toast('Download failed or share expired.'); return; }
+
+                const contentLength = res.headers.get('Content-Length');
+                const total  = contentLength ? parseInt(contentLength, 10) : 0;
+                const reader = res.body.getReader();
+                const chunks = [];
+                let received = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    received += value.length;
+                    if (total > 0) {
+                        const pct = Math.round((received / total) * 100);
+                        progressBar.value = pct;
+                        progressLabel.textContent =
+                            `${pct}%  —  ${formatBytes(received)} / ${formatBytes(total)}`;
+                    } else {
+                        progressBar.removeAttribute('value');
+                        progressLabel.textContent = `${formatBytes(received)} downloaded…`;
+                    }
+                }
+
+                progressBar.value = 100;
+                progressLabel.textContent = 'Done!';
+
+                const filename = document.getElementById('fileName').textContent;
+                const blob = new Blob(chunks);
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href = url; a.download = filename; a.click();
+                URL.revokeObjectURL(url);
+
+            } catch {
+                toast('Download error. Please try again.');
+            } finally {
+                dlBtn.disabled = false;
+                setTimeout(() => {
+                    progressWrap.style.display = 'none';
+                    progressBar.value = 0;
+                }, 1500);
+            }
+        });
+
+        // ── Try another PIN ───────────────────────────────────────────────────
+        document.getElementById('tryAnotherBtn').addEventListener('click', () => {
+            digits.forEach(d => { d.value = ''; d.classList.remove('filled'); });
+            currentPin = '';
+            lookupBtn.disabled = true;
+            document.getElementById('lookupLabel').textContent = 'Look Up File';
+            document.getElementById('fileStep').style.display = 'none';
+            document.getElementById('pinStep').style.display  = 'block';
+            digits[0].focus();
+        });
+
+        // ── Auto-fill PIN from URL ?pin=XXXXXX ───────────────────────────────
+        const urlPin = new URLSearchParams(window.location.search).get('pin');
+        if (urlPin) {
+            const clean = urlPin.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+            [...clean].forEach((char, i) => {
+                if (digits[i]) { digits[i].value = char; digits[i].classList.add('filled'); }
+            });
+            checkPin();
+            if (clean.length === 6) lookupBtn.click();
+        } else {
+            digits[0].focus();
+        }
+    </script>
+</body>
+</html>

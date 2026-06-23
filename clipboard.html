@@ -31,6 +31,9 @@
                 <button class="nav-item" data-panel="filesPanel" id="navFiles">
                     <i class="fas fa-folder-open"></i> Files
                 </button>
+                <a class="nav-item" href="/share.html" style="text-decoration:none;">
+                    <i class="fas fa-download"></i> Redeem PIN
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -133,6 +136,12 @@
                             <i class="fas fa-folder-open" style="font-size:2rem;margin-bottom:.75rem;display:block;opacity:.3;"></i>
                             No files uploaded yet.
                         </div>
+                    </div>
+
+                    <!-- Active shares -->
+                    <div id="sharesSection" style="display:none;margin-top:1.75rem;">
+                        <p class="section-title">Active shares</p>
+                        <div id="activeShares"></div>
                     </div>
                 </div>
 
