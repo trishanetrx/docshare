@@ -128,8 +128,12 @@ pm2 save
 pm2 startup systemd -u root --hp /root
 
 # -- Nginx - initial HTTP config for Certbot ----------------------------------
-echo "==> Writing initial Nginx config (HTTP only)..."
-cat > "$NGINX_CONF" <<EOF
+# Only run certbot if cert doesn't exist yet
+CERT_PATH="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+
+if [ ! -f "$CERT_PATH" ]; then
+    echo "==> Writing initial Nginx config (HTTP only for cert challenge)..."
+    cat > "$NGINX_CONF" <<EOF
 server {
     listen 80;
     server_name ${DOMAIN};
@@ -143,20 +147,22 @@ server {
     }
 }
 EOF
+    ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/docshare
+    rm -f /etc/nginx/sites-enabled/default
+    nginx -t
+    systemctl reload nginx
 
-ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/docshare
-rm -f /etc/nginx/sites-enabled/default
-nginx -t
-systemctl reload nginx
+    echo "==> Requesting SSL certificate for ${DOMAIN}..."
+    certbot --nginx -d "$DOMAIN" \
+        --agree-tos --no-eff-email --email "$EMAIL" \
+        --redirect --non-interactive
+else
+    echo "==> SSL cert already exists, skipping certbot."
+    ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/docshare
+fi
 
-# -- SSL ----------------------------------------------------------------------
-echo "==> Requesting SSL certificate for ${DOMAIN}..."
-certbot --nginx -d "$DOMAIN" \
-    --agree-tos --no-eff-email --email "$EMAIL" \
-    --redirect --non-interactive
-
-# -- Nginx - final HTTPS config -----------------------------------------------
-echo "==> Writing final Nginx config (HTTPS + static + API proxy)..."
+# -- Nginx - final HTTPS config (always written on every deploy) --------------
+echo "==> Writing final Nginx config..."
 cat > "$NGINX_CONF" <<EOF
 server {
     listen 80;
