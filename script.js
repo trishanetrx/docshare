@@ -165,7 +165,8 @@ document.getElementById('saveClipboard').addEventListener('click', async () => {
 });
 
 document.getElementById('clearClipboard').addEventListener('click', async () => {
-    if (!confirm('Clear all clipboard items?')) return;
+    const ok = await showConfirm('Clear all clipboard items?', 'This cannot be undone.', 'Clear');
+    if (!ok) return;
     try {
         const res = await fetch(`${apiUrl}/clipboard`, {
             method: 'DELETE',
@@ -351,15 +352,25 @@ async function loadFiles() {
 }
 
 async function deleteFile(filename) {
-    if (!confirm(`Delete "${filename}"?`)) return;
+    const ok = await showConfirm(`Delete "${filename}"?`, 'This file will be permanently removed.');
+    if (!ok) return;
     try {
         const res = await fetch(`${apiUrl}/files/${encodeURIComponent(filename)}`, {
             method: 'DELETE',
             headers: getAuthHeader(),
         });
-        if (res.ok) { toast('File deleted.', 'info'); await loadFiles(); }
-        else toast('Failed to delete file.');
-    } catch { toast('Failed to delete file.'); }
+        if (res.ok) {
+            toast('File deleted.', 'info');
+            await loadFiles();
+            await loadShares();
+        } else {
+            const data = await res.json().catch(() => ({}));
+            toast(data.message || 'Failed to delete file.');
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        toast('Failed to delete file.');
+    }
 }
 
 // ── File input / drop zone ────────────────────────────────────────────────────
@@ -448,7 +459,55 @@ uploadBtn.addEventListener('click', () => {
     xhr.send(formData);
 });
 
-// ── Share PIN ─────────────────────────────────────────────────────────────────
+// ── Custom confirm dialog (replaces browser confirm()) ───────────────────────
+function showConfirm(message, subtext = '', confirmLabel = 'Delete') {
+    return new Promise(resolve => {
+        document.getElementById('confirmModal')?.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'confirmModal';
+        modal.style.cssText = `
+            position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;
+            display:flex;align-items:center;justify-content:center;padding:1rem;`;
+
+        modal.innerHTML = `
+            <div style="background:var(--bg-surface);border:1px solid var(--border);
+                        border-radius:var(--radius-lg);padding:1.75rem;max-width:380px;
+                        width:100%;box-shadow:var(--shadow);animation:slideIn .2s ease;">
+                <div style="display:flex;align-items:flex-start;gap:.85rem;margin-bottom:1.25rem;">
+                    <div style="width:36px;height:36px;background:rgba(239,68,68,.15);border-radius:8px;
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:.95rem;"></i>
+                    </div>
+                    <div>
+                        <p style="font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:${subtext ? '.3rem' : '0'};">${message}</p>
+                        ${subtext ? `<p style="font-size:.8rem;color:var(--text-muted);">${subtext}</p>` : ''}
+                    </div>
+                </div>
+                <div style="display:flex;gap:.6rem;justify-content:flex-end;">
+                    <button id="confirmNo"  class="btn btn-ghost"  style="min-width:80px;justify-content:center;">Cancel</button>
+                    <button id="confirmYes" class="btn btn-danger" style="min-width:80px;justify-content:center;">${confirmLabel}</button>
+                </div>
+            </div>`;
+
+        document.body.appendChild(modal);
+
+        const cleanup = result => { modal.remove(); resolve(result); };
+        document.getElementById('confirmYes').addEventListener('click', () => cleanup(true));
+        document.getElementById('confirmNo').addEventListener('click',  () => cleanup(false));
+        modal.addEventListener('click', e => { if (e.target === modal) cleanup(false); });
+
+        // Keyboard: Enter = confirm, Escape = cancel
+        const onKey = e => {
+            if (e.key === 'Enter')  { document.removeEventListener('keydown', onKey); cleanup(true); }
+            if (e.key === 'Escape') { document.removeEventListener('keydown', onKey); cleanup(false); }
+        };
+        document.addEventListener('keydown', onKey);
+        document.getElementById('confirmNo').focus();
+    });
+}
+
+
 async function shareFile(filename) {
     try {
         const res  = await fetch(`${apiUrl}/shares`, {
@@ -592,7 +651,8 @@ function renderShares(shares) {
 }
 
 async function revokeShare(pin) {
-    if (!confirm(`Revoke share PIN ${pin}?`)) return;
+    const ok = await showConfirm(`Revoke share PIN ${pin}?`, 'The recipient will no longer be able to download the file.', 'Revoke');
+    if (!ok) return;
     try {
         const res = await fetch(`${apiUrl}/shares/${pin}`, {
             method: 'DELETE',
