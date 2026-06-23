@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
@@ -7,175 +6,193 @@ const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// Load .env file if present (development and standalone production)
+try { require('dotenv').config(); } catch { /* dotenv optional in dev */ }
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 
-// Secret key for JWT signing
-const JWT_SECRET = '870293100v'; // Replace with a strong key in production
+// ── Paths ─────────────────────────────────────────────────────────────────────
+const DATA_DIR    = process.env.DATA_DIR    || path.join(__dirname, 'data');
+const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
+const PUBLIC_DIR  = path.join(__dirname, 'public');
 
-// Middleware configuration
-app.use(cors({
-    //origin: 'https://clipboard.copythingz.shop', // Allow requests from Netlify frontend
-    origin: ['https://copythingz.shop', 'https://clipboard.copythingz.shop', 'https://copythingz.netlify.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-app.use(bodyParser.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files
+// Ensure data & upload directories exist
+fs.mkdirSync(DATA_DIR,    { recursive: true });
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
-// Handle CORS preflight requests
-app.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', 'https://clipboard.copythingz.shop');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.sendStatus(204); // Respond with no content for preflight
-});
+// ── Simple JSON file-based persistence ───────────────────────────────────────
+const USERS_FILE     = path.join(DATA_DIR, 'users.json');
+const CLIPBOARD_FILE = path.join(DATA_DIR, 'clipboard.json');
 
-// Add /api prefix to all routes
-const router = express.Router();
-
-// In-memory user store (for demo purposes)
-let users = [];
-
-// Custom storage configuration for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'uploads'));
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        const filename = `${file.originalname.replace(ext, '')}-${Date.now()}${ext}`; // Fixed syntax
-        cb(null, filename);
-    }
-});
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } }); // 50 MB limit
-
-// Routes
-
-// User Registration
-router.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).send({ message: 'Username and password are required.' });
-    }
-
-    const existingUser = users.find(user => user.username === username);
-    if (existingUser) {
-        return res.status(400).send({ message: 'User already exists.' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, password: hashedPassword });
-    res.status(201).send({ message: 'User registered successfully.' });
-});
-
-// User Login
-router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-
-    const user = users.find(user => user.username === username);
-    if (!user) {
-        return res.status(400).send({ message: 'Invalid username or password.' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-        return res.status(400).send({ message: 'Invalid username or password.' });
-    }
-
-    const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).send({ message: 'Login successful.', token });
-});
-
-// Middleware for authentication
-function authenticate(req, res, next) {
-    const authHeader = req.header('Authorization');
-    const token = authHeader ? authHeader.split(' ')[1] : null; // Extract token
-
-    if (!token) {
-        console.log('No token provided'); // Debug log
-        return res.status(401).send({ message: 'No token, authorization denied.' });
-    }
-
+function readJSON(file, fallback) {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('Decoded token:', decoded); // Debug log
-        req.user = decoded;
-        next();
-    } catch (err) {
-        console.log('Invalid token:', err.message); // Debug log
-        res.status(401).send({ message: 'Invalid token.' });
+        return JSON.parse(fs.readFileSync(file, 'utf8'));
+    } catch {
+        return fallback;
     }
 }
 
-// Clipboard API
-let clipboardData = [];
+function writeJSON(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+}
 
-// Save clipboard data
+// ── Middleware ────────────────────────────────────────────────────────────────
+// When running standalone (no separate frontend origin) CORS can be relaxed.
+// If you still want to allow an external origin during testing, set CORS_ORIGIN env var.
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : null; // null = same-origin only (no CORS header needed)
+
+if (allowedOrigins) {
+    app.use(cors({
+        origin: allowedOrigins,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    }));
+}
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files
+app.use('/uploads', express.static(UPLOADS_DIR));
+
+// Serve frontend static files (standalone deployment)
+app.use(express.static(PUBLIC_DIR));
+
+// ── File upload config ────────────────────────────────────────────────────────
+const storage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_\-]/g, '_');
+        cb(null, `${base}-${Date.now()}${ext}`);
+    }
+});
+const upload = multer({
+    storage,
+    limits: { fileSize: Number(process.env.MAX_FILE_SIZE_MB || 2500) * 1024 * 1024 }
+});
+
+// ── Auth middleware ───────────────────────────────────────────────────────────
+function authenticate(req, res, next) {
+    const authHeader = req.header('Authorization');
+    const token = authHeader ? authHeader.split(' ')[1] : null;
+    if (!token) return res.status(401).json({ message: 'No token, authorization denied.' });
+
+    try {
+        req.user = jwt.verify(token, JWT_SECRET);
+        next();
+    } catch (err) {
+        res.status(401).json({ message: 'Invalid or expired token.' });
+    }
+}
+
+// ── API Routes ────────────────────────────────────────────────────────────────
+const router = express.Router();
+
+// POST /api/register
+router.post('/register', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password)
+        return res.status(400).json({ message: 'Username and password are required.' });
+
+    const users = readJSON(USERS_FILE, []);
+    if (users.find(u => u.username === username))
+        return res.status(409).json({ message: 'Username already taken.' });
+
+    const hashed = await bcrypt.hash(password, 10);
+    users.push({ username, password: hashed });
+    writeJSON(USERS_FILE, users);
+
+    res.status(201).json({ message: 'Registered successfully.' });
+});
+
+// POST /api/login
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    const users = readJSON(USERS_FILE, []);
+    const user = users.find(u => u.username === username);
+
+    if (!user || !(await bcrypt.compare(password, user.password)))
+        return res.status(401).json({ message: 'Invalid username or password.' });
+
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '8h' });
+    res.json({ message: 'Login successful.', token });
+});
+
+// GET  /api/clipboard
+router.get('/clipboard', authenticate, (req, res) => {
+    const data = readJSON(CLIPBOARD_FILE, {});
+    res.json(data[req.user.username] || []);
+});
+
+// POST /api/clipboard
 router.post('/clipboard', authenticate, (req, res) => {
     const { text } = req.body;
-    clipboardData.push(text);
-    res.status(201).send({ message: 'Text added to clipboard.', data: clipboardData });
+    if (!text) return res.status(400).json({ message: 'Text is required.' });
+
+    const data = readJSON(CLIPBOARD_FILE, {});
+    if (!data[req.user.username]) data[req.user.username] = [];
+    data[req.user.username].push(text);
+    writeJSON(CLIPBOARD_FILE, data);
+
+    res.status(201).json({ message: 'Saved.', data: data[req.user.username] });
 });
 
-// Retrieve clipboard data
-router.get('/clipboard', authenticate, (req, res) => {
-    res.status(200).send(clipboardData);
-});
-
-// Clear clipboard data
+// DELETE /api/clipboard
 router.delete('/clipboard', authenticate, (req, res) => {
-    clipboardData = [];
-    res.status(200).send({ message: 'Clipboard cleared.' });
+    const data = readJSON(CLIPBOARD_FILE, {});
+    data[req.user.username] = [];
+    writeJSON(CLIPBOARD_FILE, data);
+    res.json({ message: 'Clipboard cleared.' });
 });
 
-// File Upload API
-
-// Upload a file
+// POST /api/upload
 router.post('/upload', authenticate, upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send({ message: 'No file uploaded.' });
-    }
-    res.status(200).send({ message: 'File uploaded successfully.', file: req.file.filename });
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
+    res.json({ message: 'Uploaded successfully.', file: req.file.filename });
 });
 
-// List all uploaded files
-router.get('/files', authenticate, (req, res) => {
-    const uploadsDir = path.join(__dirname, 'uploads');
-    fs.readdir(uploadsDir, (err, files) => {
-        if (err) {
-            return res.status(500).send({ message: 'Failed to load files.' });
-        }
-        res.status(200).send(files);
+// GET /api/files
+router.get('/files', authenticate, (_req, res) => {
+    fs.readdir(UPLOADS_DIR, (err, files) => {
+        if (err) return res.status(500).json({ message: 'Could not list files.' });
+        res.json(files);
     });
 });
 
-// Download a file
+// GET /api/files/:filename  (download)
 router.get('/files/:filename', authenticate, (req, res) => {
-    const filePath = path.join(__dirname, 'uploads', req.params.filename);
-    res.download(filePath, (err) => {
-        if (err) {
-            res.status(404).send({ message: 'File not found.' });
-        }
+    const filePath = path.join(UPLOADS_DIR, path.basename(req.params.filename));
+    try {
+        const stat = fs.statSync(filePath);
+        res.setHeader('Content-Length', stat.size);
+    } catch {
+        return res.status(404).json({ message: 'File not found.' });
+    }
+    res.download(filePath, err => {
+        if (err && !res.headersSent) res.status(404).json({ message: 'File not found.' });
     });
 });
 
-// Delete a file
+// DELETE /api/files/:filename
 router.delete('/files/:filename', authenticate, (req, res) => {
-    const filePath = path.join(__dirname, 'uploads', req.params.filename);
-    fs.unlink(filePath, (err) => {
-        if (err) {
-            return res.status(404).send({ message: 'File not found or could not be deleted.' });
-        }
-        res.status(200).send({ message: 'File deleted successfully.' });
+    const filePath = path.join(UPLOADS_DIR, path.basename(req.params.filename));
+    fs.unlink(filePath, err => {
+        if (err) return res.status(404).json({ message: 'File not found.' });
+        res.json({ message: 'Deleted.' });
     });
 });
 
-// Use /api prefix for all routes
 app.use('/api', router);
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// ── SPA fallback — serve index.html for any unmatched route ──────────────────
+app.get('*', (_req, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+app.listen(PORT, () => console.log(`DocShare running on http://localhost:${PORT}`));

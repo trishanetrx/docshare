@@ -1,4 +1,4 @@
-const apiUrl = 'https://api.copythingz.shop/api'; // Define the API base URL
+const apiUrl = '/api'; // relative — works for both local dev and production
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = document.getElementById('togglePassword');
