@@ -1,71 +1,75 @@
 const apiUrl = '/api'; // relative — works for both local dev and production
 
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleButton = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    const passwordIcon = document.getElementById('passwordIcon');
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(message, type = 'error') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icon = type === 'success' ? 'fa-circle-check'
+                : type === 'info'    ? 'fa-circle-info'
+                :                     'fa-circle-exclamation';
+    el.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+}
 
-    if (toggleButton && passwordInput && passwordIcon) {
-        toggleButton.addEventListener('click', () => {
-            const isPassword = passwordInput.type === 'password';
-            passwordInput.type = isPassword ? 'text' : 'password';
-            passwordIcon.classList.toggle('fa-eye', !isPassword);
-            passwordIcon.classList.toggle('fa-eye-slash', isPassword);
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    // Redirect if already logged in
+    if (localStorage.getItem('token')) {
+        window.location.replace('/clipboard.html');
+        return;
     }
 
-    const form = document.getElementById('registerForm');
-    form.addEventListener('submit', async (e) => {
+    // Password toggle
+    const toggleBtn = document.getElementById('togglePassword');
+    const passInput = document.getElementById('password');
+    const passIcon  = document.getElementById('passwordIcon');
+    toggleBtn?.addEventListener('click', () => {
+        const isPassword = passInput.type === 'password';
+        passInput.type   = isPassword ? 'text' : 'password';
+        passIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+    });
+
+    // Register form
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+        const username        = document.getElementById('username').value.trim();
+        const password        = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const submitBtn       = document.getElementById('submitBtn');
+        const submitLabel     = document.getElementById('submitLabel');
 
-        if (!username || !password || !confirmPassword) {
-            return showNotification('All fields are required.', 'error');
-        }
+        if (!username || !password || !confirmPassword)
+            return toast('Please fill in all fields.');
+        if (password.length < 6)
+            return toast('Password must be at least 6 characters.');
+        if (password !== confirmPassword)
+            return toast('Passwords do not match.');
 
-        if (password !== confirmPassword) {
-            return showNotification('Passwords do not match.', 'error');
-        }
-
-        const submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
+        submitLabel.textContent = 'Creating account…';
 
         try {
-            const res = await fetch(`${apiUrl}/register`, {
+            const res  = await fetch(`${apiUrl}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
             });
-
             const data = await res.json().catch(() => ({}));
 
             if (res.ok) {
-                showNotification('Registration successful! Redirecting...', 'success');
-                setTimeout(() => window.location.href = '/login.html', 2000);
+                toast('Account created! Redirecting to sign in…', 'success');
+                setTimeout(() => window.location.href = '/login.html', 1200);
             } else {
-                showNotification(data.message || 'Registration failed.', 'error');
+                toast(data.message || 'Registration failed.');
+                submitBtn.disabled = false;
+                submitLabel.textContent = 'Create Account';
             }
-        } catch (err) {
-            console.error('Registration error:', err);
-            showNotification('An error occurred. Please try again.', 'error');
-        } finally {
+        } catch {
+            toast('Network error. Please try again.');
             submitBtn.disabled = false;
+            submitLabel.textContent = 'Create Account';
         }
     });
 });
-
-// Show toast-style message
-function showNotification(message, type = 'error') {
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg text-white ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => notification.remove(), 3000);
-}

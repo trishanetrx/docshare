@@ -3,55 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="An online clipboard application to save and load text easily.">
-    <meta name="keywords" content="clipboard, online, text, save, load">
-    <title>Online Clipboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="description" content="ClipShare — sync your clipboard and files across any device.">
+    <title>ClipShare — Online Clipboard & File Sharing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100 font-roboto">
-    <!-- Header Section -->
-    <header class="text-white p-4 flex justify-end items-center">
-        <h1 class="heading">Clipboard</h1>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto p-4" style="min-height: calc(100vh - 5rem);">
-        <!-- Buttons -->
-        <div class="flex justify-center space-x-4 mt-8">
-            <button id="loginButton" class="text-white px-6 py-3 rounded">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-            <button id="registerButton" class="text-white px-6 py-3 rounded">
-                <i class="fas fa-user-plus"></i> Register
-            </button>
-            <button id="clipboardButton" class="text-white px-6 py-3 rounded">
-                <i class="fas fa-clipboard"></i> Clipboard
-            </button>
+<body>
+    <div class="landing">
+        <div class="landing-badge">
+            <i class="fas fa-clipboard"></i> Clipboard & File Sharing
         </div>
-    </main>
 
-    <!-- Footer Section -->
-    <footer>
-        &copy; 2024 VentiqoTech. All rights reserved.
-    </footer>
+        <h1 class="landing-title">
+            Your clipboard,<br><span>everywhere.</span>
+        </h1>
 
-    <!-- JavaScript -->
+        <p class="landing-sub">
+            Sync text snippets and files securely across all your devices.
+            No extensions, no installs — just sign in and go.
+        </p>
+
+        <div class="landing-actions">
+            <a href="login.html" class="btn btn-primary" style="padding:.75rem 1.75rem;font-size:1rem;">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="register.html" class="btn btn-ghost" style="padding:.75rem 1.75rem;font-size:1rem;">
+                <i class="fas fa-user-plus"></i> Create Account
+            </a>
+        </div>
+
+        <div class="landing-features">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-clipboard-list"></i></div>
+                <div class="feature-title">Clipboard Sync</div>
+                <div class="feature-desc">Save text snippets with syntax highlighting and access them from anywhere.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="feature-title">File Sharing</div>
+                <div class="feature-desc">Upload files up to 2.5 GB with real-time progress tracking.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                <div class="feature-title">Secure</div>
+                <div class="feature-desc">JWT-secured accounts with bcrypt password hashing.</div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Event listeners for button clicks
-        document.getElementById('loginButton').addEventListener('click', () => {
-            window.location.href = '/login.html';
-        });
-
-        document.getElementById('registerButton').addEventListener('click', () => {
-            window.location.href = '/register.html';
-        });
-
-        document.getElementById('clipboardButton').addEventListener('click', () => {
-            window.location.href = '/login.html'; // Redirect to login if user clicks Clipboard
-        });
+        // If already logged in, skip landing and go straight to the app
+        if (localStorage.getItem('token')) {
+            window.location.replace('clipboard.html');
+        }
     </script>
 </body>
 </html>

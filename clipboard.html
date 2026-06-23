@@ -3,74 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="An online clipboard application to save and load text easily.">
-    <title>VentiqoTech Clipboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <meta name="description" content="ClipShare — clipboard and file sharing">
+    <title>ClipShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="toastContainer" class="toast-container"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-layout">
+
+        <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-clipboard"></i></div>
+                <span class="sidebar-logo-text">ClipShare</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-panel="clipboardPanel" id="navClipboard">
+                    <i class="fas fa-clipboard-list"></i> Clipboard
+                </button>
+                <button class="nav-item" data-panel="filesPanel" id="navFiles">
+                    <i class="fas fa-folder-open"></i> Files
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-pill">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <span class="user-name" id="userName">Loading…</span>
+                    <button class="btn-icon" id="logoutButton" title="Sign out">
+                        <i class="fas fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── Main ────────────────────────────────────────────────────────── -->
+        <div class="app-main">
+
+            <!-- Topbar -->
+            <div class="app-topbar">
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <span class="topbar-title" id="topbarTitle">Clipboard</span>
+                </div>
+                <div style="display:flex;gap:.5rem;">
+                    <!-- panel-specific action buttons injected here by JS -->
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="app-content">
+
+                <!-- ── Clipboard Panel ───────────────────────────────────── -->
+                <div class="panel active" id="clipboardPanel">
+
+                    <!-- Input card -->
+                    <div class="card" style="margin-bottom:1.25rem;">
+                        <p class="section-title">New entry</p>
+                        <textarea class="input" id="clipboardInput"
+                            placeholder="Paste or type text here…" rows="5"></textarea>
+                        <div style="display:flex;gap:.6rem;margin-top:.85rem;">
+                            <button class="btn btn-primary" id="saveClipboard">
+                                <i class="fas fa-floppy-disk"></i> Save
+                            </button>
+                            <button class="btn btn-ghost" id="clearClipboard">
+                                <i class="fas fa-trash-can"></i> Clear all
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Saved items -->
+                    <p class="section-title">Saved items</p>
+                    <div id="clipboardList">
+                        <div class="empty-state" id="clipboardEmpty"
+                             style="text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:.875rem;">
+                            <i class="fas fa-clipboard" style="font-size:2rem;margin-bottom:.75rem;display:block;opacity:.3;"></i>
+                            No saved items yet. Paste something above.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Files Panel ───────────────────────────────────────── -->
+                <div class="panel" id="filesPanel">
+
+                    <!-- Drop zone -->
+                    <div class="card" style="margin-bottom:1.25rem;padding:0;overflow:hidden;">
+                        <div class="drop-zone" id="dropZone">
+                            <input type="file" id="fileInput" multiple>
+                            <div class="drop-zone-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+                            <div class="drop-zone-text">Drop files here or click to browse</div>
+                            <div class="drop-zone-sub">Max 2500 MB per file</div>
+                        </div>
+
+                        <!-- Selected file info + upload button -->
+                        <div id="fileSelected" style="display:none;padding:1rem 1.25rem;border-top:1px solid var(--border);">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                                <div style="display:flex;align-items:center;gap:.6rem;overflow:hidden;">
+                                    <i class="fas fa-file" style="color:var(--accent);flex-shrink:0;"></i>
+                                    <span id="selectedFileName" style="font-size:.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                                    <span id="selectedFileSize" style="font-size:.75rem;color:var(--text-muted);flex-shrink:0;"></span>
+                                </div>
+                                <button class="btn btn-primary" id="uploadButton" style="flex-shrink:0;">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                            </div>
+
+                            <!-- Upload progress -->
+                            <div id="uploadProgressWrap" style="display:none;margin-top:.85rem;">
+                                <progress id="uploadProgress" value="0" max="100"></progress>
+                                <p id="uploadProgressLabel" style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem;">Uploading…</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File list -->
+                    <p class="section-title">Uploaded files</p>
+                    <div id="fileList">
+                        <div id="filesEmpty"
+                             style="text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:.875rem;">
+                            <i class="fas fa-folder-open" style="font-size:2rem;margin-bottom:.75rem;display:block;opacity:.3;"></i>
+                            No files uploaded yet.
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /app-content -->
+        </div><!-- /app-main -->
+    </div><!-- /app-layout -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
-</head>
-<body class="bg-gray-100 font-roboto">
-    <!-- Header Section -->
-    <header class="bg-blue-600 text-white p-4" style="background: url('/clipboardblueline.png') center/cover no-repeat;">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1>.</h1>
-            <div>
-                <button id="logoutButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Logout</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto p-4">
-        <!-- Status Message -->
-        <div id="statusMessage" class="text-center text-lg font-semibold mb-4 hidden"></div>
-
-        <!-- Clipboard Section -->
-        <section id="clipboardSection">
-            <h2 class="text-xl font-semibold mb-4 text-right">Clipboard</h2>
-            <textarea id="clipboardInput" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Type or paste your text here..."></textarea>
-            <div class="flex justify-start space-x-4">
-                <button id="saveClipboard" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
-                <button id="clearClipboard" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Clear</button>
-            </div>
-        </section>
-
-        <!-- Saved Clipboard Data -->
-        <section class="mt-6">
-            <h2 class="text-xl font-semibold mb-2">Saved Clipboard Data</h2>
-            <ul id="clipboardList" class="list-none pl-0">
-                <!-- Dynamic blocks will be added here -->
-            </ul>
-        </section>
-
-        <!-- File Upload Section -->
-        <section class="mt-6">
-            <h2 class="text-xl font-semibold mb-2">File Upload</h2>
-            <input type="file" id="fileInput" class="mb-4 p-2 border border-gray-300 rounded w-full">
-            <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
-
-            <!-- Upload Progress Bar -->
-            <progress id="uploadProgress" value="0" max="100"
-                class="w-full h-3 mt-3 rounded overflow-hidden appearance-none hidden bg-gray-200
-                [&::-webkit-progress-bar]:bg-gray-200
-                [&::-webkit-progress-value]:bg-blue-500
-                [&::-moz-progress-bar]:bg-blue-500">
-            </progress>
-        </section>
-
-        <!-- Uploaded Files -->
-        <section class="mt-6">
-            <h2 class="text-xl font-semibold mb-2">Uploaded Files</h2>
-            <ul id="fileList" class="list-disc pl-5">
-                <li class="text-gray-500">No files uploaded.</li>
-            </ul>
-        </section>
-    </main>
-
-    <!-- External JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>

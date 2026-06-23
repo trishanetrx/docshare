@@ -3,46 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Registration page for Online Clipboard">
-    <meta name="keywords" content="register, clipboard, online">
-    <title>Register - Online Clipboard</title>
-
-    <!-- TailwindCSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="description" content="Create a ClipShare account">
+    <title>Create Account — ClipShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body>
+    <div id="toastContainer" class="toast-container"></div>
 
-    <!-- Registration Form -->
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-bold text-center mb-4">Register</h2>
-        <form id="registerForm">
-            <!-- Username Input -->
-            <label for="username" class="block text-gray-700">Username</label>
-            <input type="text" id="username" class="w-full p-2 border rounded mb-4" placeholder="Enter your username" required>
-
-            <!-- Password Input -->
-            <label for="password" class="block text-gray-700">Password</label>
-            <div class="relative">
-                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Enter your password" required>
-                <button type="button" id="togglePassword" class="absolute right-2 top-3 text-gray-500">
-                    <i id="passwordIcon" class="fas fa-eye"></i>
-                </button>
+    <div class="auth-page">
+        <div class="auth-box">
+            <div class="auth-logo">
+                <div class="auth-logo-icon"><i class="fas fa-clipboard"></i></div>
+                <span class="auth-logo-text">ClipShare</span>
             </div>
 
-            <!-- Confirm Password Input -->
-            <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
-            <input type="password" id="confirmPassword" class="w-full p-2 border rounded mb-4" placeholder="Confirm your password" required>
+            <h1 class="auth-title">Create account</h1>
+            <p class="auth-subtitle">Get started — it's free.</p>
 
-            <!-- Submit Button -->
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Register</button>
-        </form>
+            <form id="registerForm" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input class="input" type="text" id="username" name="username"
+                           placeholder="choose a username" autocomplete="username" required>
+                </div>
 
-        <!-- Redirect to Login -->
-        <p class="mt-4 text-center">Already have an account? <a href="/login.html" class="text-blue-500">Login</a></p>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrap">
+                        <input class="input" type="password" id="password" name="password"
+                               placeholder="min. 6 characters" autocomplete="new-password" required>
+                        <button type="button" class="toggle-pw" id="togglePassword" aria-label="Toggle password">
+                            <i id="passwordIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <input class="input" type="password" id="confirmPassword" name="confirmPassword"
+                           placeholder="repeat your password" autocomplete="new-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn"
+                        style="width:100%;justify-content:center;padding:.75rem;font-size:.95rem;margin-top:.5rem;">
+                    <i class="fas fa-user-plus"></i>
+                    <span id="submitLabel">Create Account</span>
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                Already have an account? <a href="login.html">Sign in</a>
+            </div>
+        </div>
     </div>
 
-    <!-- JavaScript -->
     <script src="register.js"></script>
 </body>
 </html>

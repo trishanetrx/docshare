@@ -1,70 +1,71 @@
 const apiUrl = '/api'; // relative — works for both local dev and production
 
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleButton = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    const passwordIcon = document.getElementById('passwordIcon');
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(message, type = 'error') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icon = type === 'success' ? 'fa-circle-check'
+                : type === 'info'    ? 'fa-circle-info'
+                :                     'fa-circle-exclamation';
+    el.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+}
 
-    if (toggleButton && passwordInput && passwordIcon) {
-        toggleButton.addEventListener('click', () => {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordIcon.classList.remove('fa-eye');
-                passwordIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordIcon.classList.remove('fa-eye-slash');
-                passwordIcon.classList.add('fa-eye');
-            }
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    // Redirect if already logged in
+    if (localStorage.getItem('token')) {
+        window.location.replace('/clipboard.html');
+        return;
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Prevent default form submission
+    // Password toggle
+    const toggleBtn  = document.getElementById('togglePassword');
+    const passInput  = document.getElementById('password');
+    const passIcon   = document.getElementById('passwordIcon');
+    toggleBtn?.addEventListener('click', () => {
+        const isPassword = passInput.type === 'password';
+        passInput.type   = isPassword ? 'text' : 'password';
+        passIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+    });
 
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
+    // Login form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username   = document.getElementById('username').value.trim();
+        const password   = document.getElementById('password').value;
+        const submitBtn  = document.getElementById('submitBtn');
+        const submitLabel = document.getElementById('submitLabel');
+
+        if (!username || !password) return toast('Please fill in all fields.');
+
+        submitBtn.disabled = true;
+        submitLabel.textContent = 'Signing in…';
 
         try {
-            const response = await fetch(`${apiUrl}/login`, {
+            const res  = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
+            const data = await res.json();
 
-            const data = await response.json();
-
-            if (response.ok && data.token) {
+            if (res.ok && data.token) {
                 localStorage.setItem('token', data.token);
-                showNotification('Login successful! Redirecting...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = '/clipboard.html';
-                }, 2000);
+                localStorage.setItem('username', username);
+                toast('Signed in! Redirecting…', 'success');
+                setTimeout(() => window.location.href = '/clipboard.html', 1000);
             } else {
-                showNotification(data.message || 'Login failed. No token received.', 'error');
+                toast(data.message || 'Invalid username or password.');
+                submitBtn.disabled = false;
+                submitLabel.textContent = 'Sign In';
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            showNotification('An error occurred. Please try again.', 'error');
+        } catch {
+            toast('Network error. Please try again.');
+            submitBtn.disabled = false;
+            submitLabel.textContent = 'Sign In';
         }
     });
 });
-
-// Function to display notifications
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
-
-    document.body.appendChild(notification);
-
-    // Automatically remove the notification after 3 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
