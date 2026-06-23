@@ -178,15 +178,8 @@ server {
     root   ${PUBLIC_DIR};
     index  index.html;
 
-    location / {
-        try_files \$uri \$uri/ /index.html;
-    }
-
-    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
-        expires 7d;
-        add_header Cache-Control "public, immutable";
-    }
-
+    # API proxy MUST come before the static asset regex
+    # so DELETE/PUT on /api/files/photo.jpg isn't caught by the regex below
     location /api/ {
         proxy_pass         http://127.0.0.1:3001;
         proxy_http_version 1.1;
@@ -200,6 +193,15 @@ server {
         proxy_read_timeout    600s;
         proxy_connect_timeout  60s;
         proxy_send_timeout    600s;
+    }
+
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
     }
 
     location /uploads/ {

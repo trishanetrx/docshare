@@ -480,8 +480,8 @@ function showConfirm(message, subtext = '', confirmLabel = 'Delete') {
                         <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:.95rem;"></i>
                     </div>
                     <div>
-                        <p style="font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:${subtext ? '.3rem' : '0'};">${message}</p>
-                        ${subtext ? `<p style="font-size:.8rem;color:var(--text-muted);">${subtext}</p>` : ''}
+                        <p style="font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:${subtext ? '.3rem' : '0'};word-break:break-word;">${message}</p>
+                        ${subtext ? `<p style="font-size:.8rem;color:var(--text-muted);word-break:break-word;">${subtext}</p>` : ''}
                     </div>
                 </div>
                 <div style="display:flex;gap:.6rem;justify-content:flex-end;">
