@@ -69,6 +69,10 @@ find "${APP_DIR}" -maxdepth 1 -name "*.png" -o -name "*.ico" | xargs -I{} cp {} 
 
 echo "==> Frontend assets copied to ${PUBLIC_DIR}"
 
+# Nginx runs as www-data and cannot read /root by default — open the path
+chmod 755 /root
+chmod -R 755 "$PUBLIC_DIR"
+
 # â”€â”€ .env â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if [ ! -f "${APP_DIR}/.env" ]; then
     echo "==> Creating .env from template..."

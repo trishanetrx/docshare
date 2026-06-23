@@ -1,0 +1,14 @@
+# Private keys - never commit these
+testserver
+*.key
+*.pem
+
+# Environment variables
+.env
+
+# Node
+node_modules/
+
+# Runtime data
+data/
+uploads/
