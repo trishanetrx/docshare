@@ -385,24 +385,94 @@ async function deleteFile(filename) {
 }
 
 // ── File input / drop zone ────────────────────────────────────────────────────
-const dropZone      = document.getElementById('dropZone');
-const fileInput     = document.getElementById('fileInput');
-const fileSelected  = document.getElementById('fileSelected');
-const selectedName  = document.getElementById('selectedFileName');
-const selectedSize  = document.getElementById('selectedFileSize');
-const uploadBtn     = document.getElementById('uploadButton');
+const dropZone       = document.getElementById('dropZone');
+const fileInput      = document.getElementById('fileInput');
+const fileSelected   = document.getElementById('fileSelected');
+const selectedCount  = document.getElementById('selectedFilesCount');
+const selectedList   = document.getElementById('selectedFilesList');
+const uploadBtn      = document.getElementById('uploadButton');
+const uploadBtnLabel = document.getElementById('uploadButtonLabel');
 const uploadProgWrap = document.getElementById('uploadProgressWrap');
-const uploadProg    = document.getElementById('uploadProgress');
-const uploadProgLbl = document.getElementById('uploadProgressLabel');
+const uploadProg     = document.getElementById('uploadProgress');
+const uploadProgLbl  = document.getElementById('uploadProgressLabel');
 
-function showSelectedFile(file) {
-    if (!file) { fileSelected.style.display = 'none'; return; }
-    selectedName.textContent = file.name;
-    selectedSize.textContent = formatBytes(file.size);
+// Merged file list (so successive picks/drops accumulate)
+let pendingFiles = [];
+
+function renderSelectedFiles() {
+    if (pendingFiles.length === 0) {
+        fileSelected.style.display = 'none';
+        return;
+    }
+
     fileSelected.style.display = 'block';
+    const totalBytes = pendingFiles.reduce((s, f) => s + f.size, 0);
+    selectedCount.textContent =
+        `${pendingFiles.length} file${pendingFiles.length > 1 ? 's' : ''} selected — ${formatBytes(totalBytes)} total`;
+    uploadBtnLabel.textContent = `Upload ${pendingFiles.length > 1 ? pendingFiles.length + ' Files' : 'File'}`;
+
+    selectedList.innerHTML = '';
+    pendingFiles.forEach((file, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText =
+            'display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;' +
+            'background:var(--bg);border-radius:var(--radius);font-size:.8rem;';
+
+        const icon = document.createElement('i');
+        icon.className = `fas ${getFileIcon(file.name)}`;
+        icon.style.cssText = 'color:var(--accent);flex-shrink:0;width:14px;text-align:center;';
+
+        const name = document.createElement('span');
+        name.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+        name.textContent = file.name;
+        name.title = file.name;
+
+        const size = document.createElement('span');
+        size.style.cssText = 'color:var(--text-muted);flex-shrink:0;';
+        size.textContent = formatBytes(file.size);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn-icon';
+        removeBtn.title = 'Remove';
+        removeBtn.style.cssText = 'flex-shrink:0;width:22px;height:22px;font-size:.7rem;';
+        removeBtn.innerHTML = '<i class="fas fa-xmark"></i>';
+        removeBtn.addEventListener('click', () => {
+            pendingFiles.splice(idx, 1);
+            renderSelectedFiles();
+        });
+
+        row.appendChild(icon);
+        row.appendChild(name);
+        row.appendChild(size);
+        row.appendChild(removeBtn);
+        selectedList.appendChild(row);
+    });
 }
 
-fileInput.addEventListener('change', () => showSelectedFile(fileInput.files[0]));
+function addFiles(newFiles) {
+    const MAX_FILES = 20;
+    const MAX_SIZE  = 2500 * 1024 * 1024;
+    for (const file of newFiles) {
+        if (pendingFiles.length >= MAX_FILES) {
+            toast(`Maximum ${MAX_FILES} files at a time.`);
+            break;
+        }
+        if (file.size > MAX_SIZE) {
+            toast(`"${file.name}" exceeds the 2500 MB limit and was skipped.`);
+            continue;
+        }
+        // Avoid exact duplicates (same name + size)
+        const dup = pendingFiles.some(f => f.name === file.name && f.size === file.size);
+        if (!dup) pendingFiles.push(file);
+    }
+    renderSelectedFiles();
+}
+
+fileInput.addEventListener('change', () => {
+    addFiles(Array.from(fileInput.files));
+    // Reset so the same file can be picked again if removed
+    fileInput.value = '';
+});
 
 // Drag and drop
 dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -410,23 +480,14 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover
 dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-        // Create a new DataTransfer to assign to the input
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        fileInput.files = dt.files;
-        showSelectedFile(file);
-    }
+    addFiles(Array.from(e.dataTransfer.files));
 });
 
-uploadBtn.addEventListener('click', () => {
-    const file = fileInput.files[0];
-    if (!file) return toast('Please select a file first.');
-    if (file.size > 2500 * 1024 * 1024) return toast('File exceeds 2500 MB limit.');
+uploadBtn.addEventListener('click', async () => {
+    if (pendingFiles.length === 0) return toast('Please select at least one file first.');
 
     const formData = new FormData();
-    formData.append('file', file);
+    pendingFiles.forEach(file => formData.append('files', file));
 
     uploadProgWrap.style.display = 'block';
     uploadProg.value = 0;
@@ -441,7 +502,8 @@ uploadBtn.addEventListener('click', () => {
         if (e.lengthComputable) {
             const pct = Math.round((e.loaded / e.total) * 100);
             uploadProg.value = pct;
-            uploadProgLbl.textContent = `${pct}%  —  ${formatBytes(e.loaded)} / ${formatBytes(e.total)}`;
+            uploadProgLbl.textContent =
+                `${pct}%  —  ${formatBytes(e.loaded)} / ${formatBytes(e.total)}`;
         }
     };
 
@@ -449,10 +511,12 @@ uploadBtn.addEventListener('click', () => {
         uploadBtn.disabled = false;
         if (xhr.status >= 200 && xhr.status < 300) {
             uploadProg.value = 100;
-            uploadProgLbl.textContent = 'Upload complete!';
-            fileInput.value = '';
-            showSelectedFile(null);
-            toast('File uploaded!', 'success');
+            const data = JSON.parse(xhr.responseText);
+            const count = data.files ? data.files.length : 1;
+            uploadProgLbl.textContent = `${count} file${count > 1 ? 's' : ''} uploaded!`;
+            pendingFiles = [];
+            renderSelectedFiles();
+            toast(`${count} file${count > 1 ? 's' : ''} uploaded!`, 'success');
             await loadFiles();
         } else {
             try { toast(JSON.parse(xhr.responseText).message || 'Upload failed.'); }

@@ -173,10 +173,14 @@ router.delete('/clipboard', authenticate, (req, res) => {
 
 // ── Files (per-user) ──────────────────────────────────────────────────────────
 
-// POST /api/upload
-router.post('/upload', authenticate, upload.single('file'), (req, res) => {
-    if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
-    res.json({ message: 'Uploaded successfully.', file: req.file.filename });
+// POST /api/upload  (supports single or multiple files via field name "files")
+router.post('/upload', authenticate, upload.array('files', 20), (req, res) => {
+    if (!req.files || req.files.length === 0)
+        return res.status(400).json({ message: 'No file(s) uploaded.' });
+    res.json({
+        message: `${req.files.length} file(s) uploaded successfully.`,
+        files: req.files.map(f => f.filename),
+    });
 });
 
 // GET /api/files — list only the requesting user's files

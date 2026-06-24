@@ -120,23 +120,20 @@
                             <input type="file" id="fileInput" multiple>
                             <div class="drop-zone-icon"><i class="fas fa-cloud-arrow-up"></i></div>
                             <div class="drop-zone-text">Drop files here or click to browse</div>
-                            <div class="drop-zone-sub">Max 2500 MB per file</div>
+                            <div class="drop-zone-sub">Max 2500 MB per file · Up to 20 files at once</div>
                         </div>
 
-                        <!-- Selected file info + upload button -->
+                        <!-- Selected files list + upload button -->
                         <div id="fileSelected" style="display:none;padding:1rem 1.25rem;border-top:1px solid var(--border);">
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
-                                <div style="display:flex;align-items:center;gap:.6rem;overflow:hidden;">
-                                    <i class="fas fa-file" style="color:var(--accent);flex-shrink:0;"></i>
-                                    <span id="selectedFileName" style="font-size:.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-                                    <span id="selectedFileSize" style="font-size:.75rem;color:var(--text-muted);flex-shrink:0;"></span>
-                                </div>
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem;">
+                                <span id="selectedFilesCount" style="font-size:.8rem;color:var(--text-muted);font-weight:500;"></span>
                                 <button class="btn btn-primary" id="uploadButton" style="flex-shrink:0;">
-                                    <i class="fas fa-upload"></i> Upload
+                                    <i class="fas fa-upload"></i> <span id="uploadButtonLabel">Upload</span>
                                 </button>
                             </div>
+                            <div id="selectedFilesList" style="display:flex;flex-direction:column;gap:.35rem;max-height:200px;overflow-y:auto;"></div>
 
-                            <!-- Upload progress -->
+                            <!-- Overall upload progress -->
                             <div id="uploadProgressWrap" style="display:none;margin-top:.85rem;">
                                 <progress id="uploadProgress" value="0" max="100"></progress>
                                 <p id="uploadProgressLabel" style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem;">Uploading…</p>
