@@ -212,12 +212,6 @@ server {
         try_files \$uri \$uri/ /index.html;
     }
 
-    location /uploads/ {
-        alias  ${UPLOADS_DIR}/;
-        try_files \$uri =404;
-        add_header Cache-Control "public, max-age=3600";
-    }
-
     error_log  /var/log/nginx/${DOMAIN}_error.log;
     access_log /var/log/nginx/${DOMAIN}_access.log;
 }
