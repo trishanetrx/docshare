@@ -45,32 +45,28 @@ app.use('/api/clipboard', clipboardRoutes);
 app.use('/api/files',     fileRoutes);
 app.use('/api/shares',    shareRoutes);
 
-// Legacy aliases — keep old frontend JS working without changes
-// /api/register  → /api/auth/register
-// /api/login     → /api/auth/login
-// /api/upload    → /api/files/upload
-// /api/share/:pin           → /api/shares/resolve/:pin
-// /api/share/:pin/download  → /api/shares/download/:pin
-app.use('/api', (req, res, next) => {
-    if (req.path === '/register' || req.path === '/login') {
-        req.url = '/auth' + req.url;
-        return app._router.handle(req, res, next);
-    }
-    if (req.path === '/upload') {
-        req.url = '/files/upload';
-        return app._router.handle(req, res, next);
-    }
-    const pinDownload = req.path.match(/^\/share\/([A-Z0-9]+)\/download$/i);
-    if (pinDownload) {
-        req.url = `/shares/download/${pinDownload[1]}`;
-        return app._router.handle(req, res, next);
-    }
-    const pinResolve = req.path.match(/^\/share\/([A-Z0-9]+)$/i);
-    if (pinResolve) {
-        req.url = `/shares/resolve/${pinResolve[1]}`;
-        return app._router.handle(req, res, next);
-    }
-    next();
+// ── Legacy aliases — old frontend JS uses these URLs directly ─────────────────
+// /api/register            → /api/auth/register
+// /api/login               → /api/auth/login
+// /api/upload              → /api/files/upload
+// /api/share/:pin          → /api/shares/resolve/:pin
+// /api/share/:pin/download → /api/shares/download/:pin
+app.use('/api',           authRoutes);   // catches POST /api/login, POST /api/register
+
+const legacyUpload = require('./routes/files');
+app.post('/api/upload', (req, res, next) => {
+    req.url = '/upload';
+    legacyUpload(req, res, next);
+});
+
+app.get('/api/share/:pin/download', (req, res, next) => {
+    req.url = `/download/${req.params.pin}`;
+    shareRoutes(req, res, next);
+});
+
+app.get('/api/share/:pin', (req, res, next) => {
+    req.url = `/resolve/${req.params.pin}`;
+    shareRoutes(req, res, next);
 });
 
 // ── SPA fallback ──────────────────────────────────────────────────────────────
